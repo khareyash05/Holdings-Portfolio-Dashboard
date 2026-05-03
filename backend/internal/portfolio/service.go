@@ -3,6 +3,7 @@ package portfolio
 import (
 	"context"
 	"fmt"
+	"log"
 	"math"
 	"sort"
 	"strings"
@@ -17,23 +18,26 @@ import (
 )
 
 type Service struct {
-	DB           *gorm.DB
-	Forex        *clients.ForexClient
-	Exchange     *clients.ExchangeClient
-	PriceCache   *cache.Redis[map[string]float64]
-	ForexCache   *cache.Redis[*clients.RatesResponse]
-	exchangesMu  sync.RWMutex
-	exchangesAll []models.Exchange
+	DB             *gorm.DB
+	Forex          *clients.ForexClient
+	Exchange       *clients.ExchangeClient
+	PriceCache     *cache.Redis[map[string]float64]
+	LastGoodPrice  *cache.Redis[map[string]float64]
+	ForexCache     *cache.Redis[*clients.RatesResponse]
+	exchangesMu    sync.RWMutex
+	exchangesAll   []models.Exchange
 }
 
 func New(db *gorm.DB, fx *clients.ForexClient, ex *clients.ExchangeClient,
-	priceCache *cache.Redis[map[string]float64], forexCache *cache.Redis[*clients.RatesResponse]) *Service {
+	priceCache *cache.Redis[map[string]float64], lastGoodPrice *cache.Redis[map[string]float64],
+	forexCache *cache.Redis[*clients.RatesResponse]) *Service {
 	return &Service{
-		DB:         db,
-		Forex:      fx,
-		Exchange:   ex,
-		PriceCache: priceCache,
-		ForexCache: forexCache,
+		DB:            db,
+		Forex:         fx,
+		Exchange:      ex,
+		PriceCache:    priceCache,
+		LastGoodPrice: lastGoodPrice,
+		ForexCache:    forexCache,
 	}
 }
 
@@ -81,18 +85,32 @@ func (s *Service) Exchanges(ctx context.Context) ([]models.Exchange, error) {
 	return out, nil
 }
 
-func (s *Service) snapshotsFor(ctx context.Context, exchange string) (map[string]float64, error) {
-	return s.PriceCache.GetOrLoad(ctx, strings.ToUpper(exchange), func() (map[string]float64, error) {
-		snaps, err := s.Exchange.Snapshots(ctx, exchange)
-		if err != nil {
-			return nil, err
+func (s *Service) snapshotsFor(ctx context.Context, exchange string) (map[string]float64, bool, error) {
+	key := strings.ToUpper(exchange)
+
+	if v, ok, err := s.PriceCache.Get(ctx, key); err == nil && ok {
+		return v, false, nil
+	}
+
+	snaps, err := s.Exchange.Snapshots(ctx, exchange)
+	if err != nil {
+		if v, ok, gerr := s.LastGoodPrice.Get(ctx, key); gerr == nil && ok {
+			return v, true, nil
 		}
-		m := make(map[string]float64, len(snaps))
-		for _, q := range snaps {
-			m[q.Ticker] = q.Price
-		}
-		return m, nil
-	})
+		return nil, true, err
+	}
+
+	m := make(map[string]float64, len(snaps))
+	for _, q := range snaps {
+		m[q.Ticker] = q.Price
+	}
+	if serr := s.PriceCache.Set(ctx, key, m); serr != nil {
+		log.Printf("price cache set %s: %v", key, serr)
+	}
+	if serr := s.LastGoodPrice.Set(ctx, key, m); serr != nil {
+		log.Printf("lastgood cache set %s: %v", key, serr)
+	}
+	return m, false, nil
 }
 
 func (s *Service) ratesINR(ctx context.Context) (*clients.RatesResponse, error) {
@@ -143,29 +161,45 @@ func (s *Service) Portfolio(ctx context.Context, baseCurrency string) (*models.P
 	type snapshotsResult struct {
 		ex     string
 		prices map[string]float64
+		stale  bool
 		err    error
 	}
 	ch := make(chan snapshotsResult, len(exchanges)) // for each exchange we are getting snapshots, thus should we independent of exchange , thus we are spawning goroutines here
 	for ex := range exchanges {
 		go func() {
-			p, err := s.snapshotsFor(ctx, ex) // get all the price snapshorts for stocks of an exchange from exchange-service(also cache aware)
-			ch <- snapshotsResult{ex: ex, prices: p, err: err}
+			p, stale, err := s.snapshotsFor(ctx, ex) // get all the price snapshorts for stocks of an exchange from exchange-service(also cache aware)
+			ch <- snapshotsResult{ex: ex, prices: p, stale: stale, err: err}
 		}()
 	}
-	// now extract prices, example priceMap["NYSE"]["AAPL"]
 	priceMap := map[string]map[string]float64{}
+	staleEx := map[string]bool{}
 	for i := 0; i < len(exchanges); i++ {
 		r := <-ch
 		if r.err != nil {
-			return nil, fmt.Errorf("exchange %s: %w", r.ex, r.err)
+			log.Printf("exchange %s degraded: %v", r.ex, r.err)
+			staleEx[r.ex] = true
+			continue
 		}
 		priceMap[r.ex] = r.prices
+		if r.stale {
+			staleEx[r.ex] = true
+		}
 	}
 
 	views := make([]models.HoldingView, 0, len(holdings))
 	var totalNet, totalInvested float64
+	anyStale := false
 	for _, h := range holdings {
-		curLocal := priceMap[h.Exchange][h.Ticker]
+		prices, hasPrices := priceMap[h.Exchange]
+		curLocal, hasTicker := 0.0, false
+		if hasPrices {
+			curLocal, hasTicker = prices[h.Ticker], true
+		}
+		stale := staleEx[h.Exchange]
+		if !hasTicker {
+			curLocal = h.BoughtPrice
+			stale = true
+		}
 		localToBase, err := convertFactor(rates.Rates, h.Currency, baseCurrency)
 		if err != nil {
 			return nil, err
@@ -192,9 +226,13 @@ func (s *Service) Portfolio(ctx context.Context, baseCurrency string) (*models.P
 			NetWorthBase:      round2(networth),
 			UnrealizedGains:   round2(gains),
 			GainsPct:          round2(gainsPct),
+			Stale:             stale,
 		})
 		totalInvested += invested
 		totalNet += networth
+		if stale {
+			anyStale = true
+		}
 	}
 
 	exchangesList, err := s.Exchanges(ctx)
@@ -216,6 +254,7 @@ func (s *Service) Portfolio(ctx context.Context, baseCurrency string) (*models.P
 			Invested:        round2(totalInvested),
 			UnrealizedGains: round2(gains),
 			GainsPct:        round2(pct),
+			Stale:           anyStale,
 		},
 		Holdings:  views,
 		Exchanges: exchangesList,

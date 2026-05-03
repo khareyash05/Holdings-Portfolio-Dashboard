@@ -12,6 +12,7 @@ type Config struct {
 	ExchangeBaseURL string
 	RedisURL        string
 	PriceCacheTTL   time.Duration
+	LastGoodTTL     time.Duration
 	ForexCacheTTL   time.Duration
 	StocksDataPath  string
 	ExchangesPath   string
@@ -26,6 +27,7 @@ func Load() Config {
 		ExchangeBaseURL: envOr("EXCHANGE_BASE_URL", "http://exchange-service:8082"),
 		RedisURL:        envOr("REDIS_URL", ""),
 		PriceCacheTTL:   envDuration("PRICE_CACHE_TTL", 3*time.Second),
+		LastGoodTTL:     envDuration("LAST_GOOD_TTL", 24*time.Hour),
 		ForexCacheTTL:   envDuration("FOREX_CACHE_TTL", 60*time.Second),
 		StocksDataPath:  envOr("STOCKS_DATA", "/app/data/stocks.json"),
 		ExchangesPath:   envOr("EXCHANGES_DATA", "/app/data/exchanges.json"),

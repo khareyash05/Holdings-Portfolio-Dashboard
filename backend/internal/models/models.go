@@ -38,6 +38,7 @@ type Summary struct {
 	Invested        float64 `json:"invested"`
 	UnrealizedGains float64 `json:"unrealizedGains"`
 	GainsPct        float64 `json:"gainsPct"`
+	Stale           bool    `json:"stale"`
 }
 
 type HoldingView struct {
@@ -55,6 +56,7 @@ type HoldingView struct {
 	NetWorthBase      float64 `json:"netWorthBase"`
 	UnrealizedGains   float64 `json:"unrealizedGains"`
 	GainsPct          float64 `json:"gainsPct"`
+	Stale             bool    `json:"stale"`
 }
 
 type PortfolioResponse struct {

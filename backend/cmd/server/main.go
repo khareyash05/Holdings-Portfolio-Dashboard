@@ -69,8 +69,9 @@ func main() {
 	defer rdb.Close()
 	log.Printf("cache: redis at %s", cfg.RedisURL)
 	priceCache := cache.NewRedis[map[string]float64](rdb, "price", cfg.PriceCacheTTL)
+	lastGoodPrice := cache.NewRedis[map[string]float64](rdb, "lastgood-price", cfg.LastGoodTTL)
 	forexCache := cache.NewRedis[*clients.RatesResponse](rdb, "forex", cfg.ForexCacheTTL)
-	svc := portfolio.New(gdb, forexClient, exchangeClient, priceCache, forexCache)
+	svc := portfolio.New(gdb, forexClient, exchangeClient, priceCache, lastGoodPrice, forexCache)
 	srv := &http.Server{
 		Addr:              cfg.ListenAddr,
 		Handler:           (&api.Server{Portfolio: svc}).Routes(),

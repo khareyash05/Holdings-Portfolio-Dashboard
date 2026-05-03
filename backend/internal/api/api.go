@@ -75,8 +75,6 @@ func (s *Server) handlePortfolioStream(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/event-stream") //SSE
 	w.Header().Set("Connection", "keep-alive")
-	// Tell nginx (and any other reverse proxy that honours it) not to buffer.
-	w.Header().Set("X-Accel-Buffering", "no")
 	w.WriteHeader(http.StatusOK)
 
 	// sending portfolio after marshalling

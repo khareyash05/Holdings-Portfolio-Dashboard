@@ -160,7 +160,6 @@ func (s *Seeder) Run(ctx context.Context) error {
 func boughtFactor(salt, ticker string) float64 {
 	h := fnv.New64a() // can use crypto/sha256 here as well, but this library is lightweight in nautre, and crypt/sha256 generates big numbers which we don't need for this scrope
 	h.Write([]byte(salt + "|" + ticker))
-	// 550 buckets / 1000 → [0, 0.55); +0.7 → bought price lands in [0.7, 1.25) of current; ~55% gainers
 	return 0.7 + float64(h.Sum64()%550)/1000
 }
 

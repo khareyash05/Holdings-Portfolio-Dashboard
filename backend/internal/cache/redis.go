@@ -61,6 +61,18 @@ func (c *Redis[T]) GetOrLoad(ctx context.Context, key string, loader func() (T, 
 	return res.(T), nil
 }
 
+func (c *Redis[T]) Get(ctx context.Context, key string) (T, bool, error) {
+	return c.read(ctx, c.key(key))
+}
+
+func (c *Redis[T]) Set(ctx context.Context, key string, v T) error {
+	buf, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	return c.client.Set(ctx, c.key(key), buf, c.ttl).Err()
+}
+
 func (c *Redis[T]) read(ctx context.Context, full string) (T, bool, error) {
 	var zero T
 	raw, err := c.client.Get(ctx, full).Bytes()
