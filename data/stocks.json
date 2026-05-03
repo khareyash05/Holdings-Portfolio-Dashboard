@@ -1,0 +1,1002 @@
+[
+  {
+    "ticker": "RELIANCE.NS",
+    "name": "Reliance Industries Ltd",
+    "exchange": "NSE",
+    "country": "India",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "sector": "Energy",
+    "volume": 412.45
+  },
+  {
+    "ticker": "TCS.NS",
+    "name": "Tata Consultancy Services",
+    "exchange": "NSE",
+    "country": "India",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "sector": "IT Services",
+    "volume": 355.10
+  },
+  {
+    "ticker": "HDFCBANK.NS",
+    "name": "HDFC Bank Ltd",
+    "exchange": "NSE",
+    "country": "India",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "sector": "Banking",
+    "volume": 478.66
+  },
+  {
+    "ticker": "INFY.NS",
+    "name": "Infosys Ltd",
+    "exchange": "NSE",
+    "country": "India",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "sector": "IT Services",
+    "volume": 389.55
+  },
+  {
+    "ticker": "ICICIBANK.NS",
+    "name": "ICICI Bank Ltd",
+    "exchange": "NSE",
+    "country": "India",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "sector": "Banking",
+    "volume": 321.45
+  },
+  {
+    "ticker": "SBIN.NS",
+    "name": "State Bank of India",
+    "exchange": "NSE",
+    "country": "India",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "sector": "Banking",
+    "volume": 498.12
+  },
+  {
+    "ticker": "BHARTIARTL.NS",
+    "name": "Bharti Airtel Ltd",
+    "exchange": "NSE",
+    "country": "India",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "sector": "Telecom",
+    "volume": 365.78
+  },
+  {
+    "ticker": "ITC.NS",
+    "name": "ITC Ltd",
+    "exchange": "NSE",
+    "country": "India",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "sector": "FMCG",
+    "volume": 344.32
+  },
+  {
+    "ticker": "LT.NS",
+    "name": "Larsen & Toubro",
+    "exchange": "NSE",
+    "country": "India",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "sector": "Infrastructure",
+    "volume": 433.29
+  },
+  {
+    "ticker": "AXISBANK.NS",
+    "name": "Axis Bank Ltd",
+    "exchange": "NSE",
+    "country": "India",
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "sector": "Banking",
+    "volume": 372.81
+  },
+  {
+    "ticker": "AAPL",
+    "name": "Apple Inc",
+    "exchange": "NYSE",
+    "country": "United States",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "sector": "Technology",
+    "volume": 441.92
+  },
+  {
+    "ticker": "MSFT",
+    "name": "Microsoft Corp",
+    "exchange": "NYSE",
+    "country": "United States",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "sector": "Technology",
+    "volume": 366.54
+  },
+  {
+    "ticker": "GOOGL",
+    "name": "Alphabet Inc",
+    "exchange": "NYSE",
+    "country": "United States",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "sector": "Technology",
+    "volume": 482.33
+  },
+  {
+    "ticker": "AMZN",
+    "name": "Amazon.com Inc",
+    "exchange": "NYSE",
+    "country": "United States",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "sector": "E-commerce",
+    "volume": 359.61
+  },
+  {
+    "ticker": "TSLA",
+    "name": "Tesla Inc",
+    "exchange": "NYSE",
+    "country": "United States",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "sector": "Automobile",
+    "volume": 407.28
+  },
+  {
+    "ticker": "NVDA",
+    "name": "NVIDIA Corp",
+    "exchange": "NYSE",
+    "country": "United States",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "sector": "Semiconductors",
+    "volume": 498.77
+  },
+  {
+    "ticker": "META",
+    "name": "Meta Platforms Inc",
+    "exchange": "NYSE",
+    "country": "United States",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "sector": "Technology",
+    "volume": 335.49
+  },
+  {
+    "ticker": "BRK.B",
+    "name": "Berkshire Hathaway",
+    "exchange": "NYSE",
+    "country": "United States",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "sector": "Conglomerate",
+    "volume": 321.66
+  },
+  {
+    "ticker": "JNJ",
+    "name": "Johnson & Johnson",
+    "exchange": "NYSE",
+    "country": "United States",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "sector": "Healthcare",
+    "volume": 370.22
+  },
+  {
+    "ticker": "V",
+    "name": "Visa Inc",
+    "exchange": "NYSE",
+    "country": "United States",
+    "currency": "USD",
+    "currencySymbol": "$",
+    "sector": "Fintech",
+    "volume": 454.18
+  },
+  {
+    "ticker": "HSBA.L",
+    "name": "HSBC Holdings",
+    "exchange": "LSE",
+    "country": "United Kingdom",
+    "currency": "GBP",
+    "currencySymbol": "£",
+    "sector": "Banking",
+    "volume": 376.42
+  },
+  {
+    "ticker": "BP.L",
+    "name": "BP PLC",
+    "exchange": "LSE",
+    "country": "United Kingdom",
+    "currency": "GBP",
+    "currencySymbol": "£",
+    "sector": "Energy",
+    "volume": 340.85
+  },
+  {
+    "ticker": "SHEL.L",
+    "name": "Shell PLC",
+    "exchange": "LSE",
+    "country": "United Kingdom",
+    "currency": "GBP",
+    "currencySymbol": "£",
+    "sector": "Energy",
+    "volume": 498.56
+  },
+  {
+    "ticker": "AZN.L",
+    "name": "AstraZeneca",
+    "exchange": "LSE",
+    "country": "United Kingdom",
+    "currency": "GBP",
+    "currencySymbol": "£",
+    "sector": "Pharma",
+    "volume": 390.15
+  },
+  {
+    "ticker": "ULVR.L",
+    "name": "Unilever PLC",
+    "exchange": "LSE",
+    "country": "United Kingdom",
+    "currency": "GBP",
+    "currencySymbol": "£",
+    "sector": "FMCG",
+    "volume": 320.71
+  },
+  {
+    "ticker": "GSK.L",
+    "name": "GSK PLC",
+    "exchange": "LSE",
+    "country": "United Kingdom",
+    "currency": "GBP",
+    "currencySymbol": "£",
+    "sector": "Pharma",
+    "volume": 410.88
+  },
+  {
+    "ticker": "RIO.L",
+    "name": "Rio Tinto",
+    "exchange": "LSE",
+    "country": "United Kingdom",
+    "currency": "GBP",
+    "currencySymbol": "£",
+    "sector": "Mining",
+    "volume": 455.92
+  },
+  {
+    "ticker": "BARC.L",
+    "name": "Barclays PLC",
+    "exchange": "LSE",
+    "country": "United Kingdom",
+    "currency": "GBP",
+    "currencySymbol": "£",
+    "sector": "Banking",
+    "volume": 399.33
+  },
+  {
+    "ticker": "LLOY.L",
+    "name": "Lloyds Banking Group",
+    "exchange": "LSE",
+    "country": "United Kingdom",
+    "currency": "GBP",
+    "currencySymbol": "£",
+    "sector": "Banking",
+    "volume": 345.67
+  },
+  {
+    "ticker": "BT.A.L",
+    "name": "BT Group PLC",
+    "exchange": "LSE",
+    "country": "United Kingdom",
+    "currency": "GBP",
+    "currencySymbol": "£",
+    "sector": "Telecom",
+    "volume": 332.11
+  },
+  {
+    "ticker": "MC.PA",
+    "name": "LVMH",
+    "exchange": "EURONEXT",
+    "country": "France",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Luxury",
+    "volume": 410.22
+  },
+  {
+    "ticker": "OR.PA",
+    "name": "L'Oreal",
+    "exchange": "EURONEXT",
+    "country": "France",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Consumer Goods",
+    "volume": 355.61
+  },
+  {
+    "ticker": "SAN.PA",
+    "name": "Sanofi",
+    "exchange": "EURONEXT",
+    "country": "France",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Pharma",
+    "volume": 379.42
+  },
+  {
+    "ticker": "AI.PA",
+    "name": "Air Liquide",
+    "exchange": "EURONEXT",
+    "country": "France",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Chemicals",
+    "volume": 499.91
+  },
+  {
+    "ticker": "BNP.PA",
+    "name": "BNP Paribas",
+    "exchange": "EURONEXT",
+    "country": "France",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Banking",
+    "volume": 312.87
+  },
+  {
+    "ticker": "ENGI.PA",
+    "name": "Engie",
+    "exchange": "EURONEXT",
+    "country": "France",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Energy",
+    "volume": 360.19
+  },
+  {
+    "ticker": "DG.PA",
+    "name": "Vinci SA",
+    "exchange": "EURONEXT",
+    "country": "France",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Infrastructure",
+    "volume": 421.08
+  },
+  {
+    "ticker": "ADYEN.AS",
+    "name": "Adyen NV",
+    "exchange": "EURONEXT",
+    "country": "Netherlands",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Fintech",
+    "volume": 333.55
+  },
+  {
+    "ticker": "ASML.AS",
+    "name": "ASML Holding",
+    "exchange": "EURONEXT",
+    "country": "Netherlands",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Semiconductors",
+    "volume": 482.01
+  },
+  {
+    "ticker": "PHIA.AS",
+    "name": "Philips NV",
+    "exchange": "EURONEXT",
+    "country": "Netherlands",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Healthcare",
+    "volume": 347.88
+  },
+  {
+    "ticker": "NESN.SW",
+    "name": "Nestle SA",
+    "exchange": "SIX",
+    "country": "Switzerland",
+    "currency": "CHF",
+    "currencySymbol": "CHF",
+    "sector": "Food",
+    "volume": 498.20
+  },
+  {
+    "ticker": "NOVN.SW",
+    "name": "Novartis",
+    "exchange": "SIX",
+    "country": "Switzerland",
+    "currency": "CHF",
+    "currencySymbol": "CHF",
+    "sector": "Pharma",
+    "volume": 355.99
+  },
+  {
+    "ticker": "ROG.SW",
+    "name": "Roche Holding",
+    "exchange": "SIX",
+    "country": "Switzerland",
+    "currency": "CHF",
+    "currencySymbol": "CHF",
+    "sector": "Pharma",
+    "volume": 377.45
+  },
+  {
+    "ticker": "UBSG.SW",
+    "name": "UBS Group",
+    "exchange": "SIX",
+    "country": "Switzerland",
+    "currency": "CHF",
+    "currencySymbol": "CHF",
+    "sector": "Banking",
+    "volume": 388.88
+  },
+  {
+    "ticker": "CSGN.SW",
+    "name": "Credit Suisse",
+    "exchange": "SIX",
+    "country": "Switzerland",
+    "currency": "CHF",
+    "currencySymbol": "CHF",
+    "sector": "Banking",
+    "volume": 399.01
+  },
+  {
+    "ticker": "ZURN.SW",
+    "name": "Zurich Insurance",
+    "exchange": "SIX",
+    "country": "Switzerland",
+    "currency": "CHF",
+    "currencySymbol": "CHF",
+    "sector": "Insurance",
+    "volume": 322.67
+  },
+  {
+    "ticker": "SGSN.SW",
+    "name": "SGS SA",
+    "exchange": "SIX",
+    "country": "Switzerland",
+    "currency": "CHF",
+    "currencySymbol": "CHF",
+    "sector": "Inspection",
+    "volume": 412.88
+  },
+  {
+    "ticker": "GIVN.SW",
+    "name": "Givaudan",
+    "exchange": "SIX",
+    "country": "Switzerland",
+    "currency": "CHF",
+    "currencySymbol": "CHF",
+    "sector": "Chemicals",
+    "volume": 366.22
+  },
+  {
+    "ticker": "SIKA.SW",
+    "name": "Sika AG",
+    "exchange": "SIX",
+    "country": "Switzerland",
+    "currency": "CHF",
+    "currencySymbol": "CHF",
+    "sector": "Construction",
+    "volume": 444.90
+  },
+  {
+    "ticker": "HOLN.SW",
+    "name": "Holcim Ltd",
+    "exchange": "SIX",
+    "country": "Switzerland",
+    "currency": "CHF",
+    "currencySymbol": "CHF",
+    "sector": "Cement",
+    "volume": 333.12
+  },
+  {
+    "ticker": "7203.T",
+    "name": "Toyota Motor",
+    "exchange": "TSE",
+    "country": "Japan",
+    "currency": "JPY",
+    "currencySymbol": "¥",
+    "sector": "Automobile",
+    "volume": 478.11
+  },
+  {
+    "ticker": "6758.T",
+    "name": "Sony Group",
+    "exchange": "TSE",
+    "country": "Japan",
+    "currency": "JPY",
+    "currencySymbol": "¥",
+    "sector": "Electronics",
+    "volume": 355.66
+  },
+  {
+    "ticker": "9984.T",
+    "name": "SoftBank Group",
+    "exchange": "TSE",
+    "country": "Japan",
+    "currency": "JPY",
+    "currencySymbol": "¥",
+    "sector": "Telecom",
+    "volume": 399.33
+  },
+  {
+    "ticker": "8306.T",
+    "name": "Mitsubishi UFJ",
+    "exchange": "TSE",
+    "country": "Japan",
+    "currency": "JPY",
+    "currencySymbol": "¥",
+    "sector": "Banking",
+    "volume": 366.77
+  },
+  {
+    "ticker": "9432.T",
+    "name": "NTT",
+    "exchange": "TSE",
+    "country": "Japan",
+    "currency": "JPY",
+    "currencySymbol": "¥",
+    "sector": "Telecom",
+    "volume": 322.90
+  },
+  {
+    "ticker": "6861.T",
+    "name": "Keyence",
+    "exchange": "TSE",
+    "country": "Japan",
+    "currency": "JPY",
+    "currencySymbol": "¥",
+    "sector": "Automation",
+    "volume": 444.01
+  },
+  {
+    "ticker": "7974.T",
+    "name": "Nintendo",
+    "exchange": "TSE",
+    "country": "Japan",
+    "currency": "JPY",
+    "currencySymbol": "¥",
+    "sector": "Gaming",
+    "volume": 412.78
+  },
+  {
+    "ticker": "6501.T",
+    "name": "Hitachi Ltd",
+    "exchange": "TSE",
+    "country": "Japan",
+    "currency": "JPY",
+    "currencySymbol": "¥",
+    "sector": "Industrial",
+    "volume": 387.56
+  },
+  {
+    "ticker": "6902.T",
+    "name": "Denso Corp",
+    "exchange": "TSE",
+    "country": "Japan",
+    "currency": "JPY",
+    "currencySymbol": "¥",
+    "sector": "Auto Parts",
+    "volume": 344.88
+  },
+  {
+    "ticker": "8766.T",
+    "name": "Tokio Marine",
+    "exchange": "TSE",
+    "country": "Japan",
+    "currency": "JPY",
+    "currencySymbol": "¥",
+    "sector": "Insurance",
+    "volume": 332.22
+  },
+  {
+    "ticker": "0700.HK",
+    "name": "Tencent",
+    "exchange": "HKSE",
+    "country": "Hong Kong",
+    "currency": "HKD",
+    "currencySymbol": "HK$",
+    "sector": "Technology",
+    "volume": 412.88
+  },
+  {
+    "ticker": "9988.HK",
+    "name": "Alibaba",
+    "exchange": "HKSE",
+    "country": "Hong Kong",
+    "currency": "HKD",
+    "currencySymbol": "HK$",
+    "sector": "E-commerce",
+    "volume": 355.21
+  },
+  {
+    "ticker": "1299.HK",
+    "name": "AIA Group",
+    "exchange": "HKSE",
+    "country": "Hong Kong",
+    "currency": "HKD",
+    "currencySymbol": "HK$",
+    "sector": "Insurance",
+    "volume": 388.90
+  },
+  {
+    "ticker": "0005.HK",
+    "name": "HSBC Holdings HK",
+    "exchange": "HKSE",
+    "country": "Hong Kong",
+    "currency": "HKD",
+    "currencySymbol": "HK$",
+    "sector": "Banking",
+    "volume": 366.77
+  },
+  {
+    "ticker": "0941.HK",
+    "name": "China Mobile",
+    "exchange": "HKSE",
+    "country": "Hong Kong",
+    "currency": "HKD",
+    "currencySymbol": "HK$",
+    "sector": "Telecom",
+    "volume": 322.45
+  },
+  {
+    "ticker": "2318.HK",
+    "name": "Ping An Insurance",
+    "exchange": "HKSE",
+    "country": "Hong Kong",
+    "currency": "HKD",
+    "currencySymbol": "HK$",
+    "sector": "Insurance",
+    "volume": 478.22
+  },
+  {
+    "ticker": "1398.HK",
+    "name": "ICBC",
+    "exchange": "HKSE",
+    "country": "Hong Kong",
+    "currency": "HKD",
+    "currencySymbol": "HK$",
+    "sector": "Banking",
+    "volume": 455.00
+  },
+  {
+    "ticker": "0388.HK",
+    "name": "HK Exchanges",
+    "exchange": "HKSE",
+    "country": "Hong Kong",
+    "currency": "HKD",
+    "currencySymbol": "HK$",
+    "sector": "Exchange",
+    "volume": 399.12
+  },
+  {
+    "ticker": "1928.HK",
+    "name": "Sands China",
+    "exchange": "HKSE",
+    "country": "Hong Kong",
+    "currency": "HKD",
+    "currencySymbol": "HK$",
+    "sector": "Hospitality",
+    "volume": 344.77
+  },
+  {
+    "ticker": "0823.HK",
+    "name": "Link REIT",
+    "exchange": "HKSE",
+    "country": "Hong Kong",
+    "currency": "HKD",
+    "currencySymbol": "HK$",
+    "sector": "Real Estate",
+    "volume": 333.66
+  },
+  {
+    "ticker": "RY.TO",
+    "name": "Royal Bank of Canada",
+    "exchange": "TSX",
+    "country": "Canada",
+    "currency": "CAD",
+    "currencySymbol": "C$",
+    "sector": "Banking",
+    "volume": 422.19
+  },
+  {
+    "ticker": "TD.TO",
+    "name": "Toronto Dominion Bank",
+    "exchange": "TSX",
+    "country": "Canada",
+    "currency": "CAD",
+    "currencySymbol": "C$",
+    "sector": "Banking",
+    "volume": 355.66
+  },
+  {
+    "ticker": "ENB.TO",
+    "name": "Enbridge Inc",
+    "exchange": "TSX",
+    "country": "Canada",
+    "currency": "CAD",
+    "currencySymbol": "C$",
+    "sector": "Energy",
+    "volume": 388.22
+  },
+  {
+    "ticker": "CNQ.TO",
+    "name": "Canadian Natural Resources",
+    "exchange": "TSX",
+    "country": "Canada",
+    "currency": "CAD",
+    "currencySymbol": "C$",
+    "sector": "Energy",
+    "volume": 366.11
+  },
+  {
+    "ticker": "BNS.TO",
+    "name": "Bank of Nova Scotia",
+    "exchange": "TSX",
+    "country": "Canada",
+    "currency": "CAD",
+    "currencySymbol": "C$",
+    "sector": "Banking",
+    "volume": 344.55
+  },
+  {
+    "ticker": "TRP.TO",
+    "name": "TC Energy",
+    "exchange": "TSX",
+    "country": "Canada",
+    "currency": "CAD",
+    "currencySymbol": "C$",
+    "sector": "Energy",
+    "volume": 412.88
+  },
+  {
+    "ticker": "SHOP.TO",
+    "name": "Shopify Inc",
+    "exchange": "TSX",
+    "country": "Canada",
+    "currency": "CAD",
+    "currencySymbol": "C$",
+    "sector": "Technology",
+    "volume": 478.01
+  },
+  {
+    "ticker": "SU.TO",
+    "name": "Suncor Energy",
+    "exchange": "TSX",
+    "country": "Canada",
+    "currency": "CAD",
+    "currencySymbol": "C$",
+    "sector": "Energy",
+    "volume": 399.34
+  },
+  {
+    "ticker": "CP.TO",
+    "name": "Canadian Pacific Railway",
+    "exchange": "TSX",
+    "country": "Canada",
+    "currency": "CAD",
+    "currencySymbol": "C$",
+    "sector": "Logistics",
+    "volume": 355.88
+  },
+  {
+    "ticker": "BAM.TO",
+    "name": "Brookfield Asset Mgmt",
+    "exchange": "TSX",
+    "country": "Canada",
+    "currency": "CAD",
+    "currencySymbol": "C$",
+    "sector": "Asset Management",
+    "volume": 322.45
+  },
+  {
+    "ticker": "BHP.AX",
+    "name": "BHP Group",
+    "exchange": "ASX",
+    "country": "Australia",
+    "currency": "AUD",
+    "currencySymbol": "A$",
+    "sector": "Mining",
+    "volume": 478.44
+  },
+  {
+    "ticker": "CBA.AX",
+    "name": "Commonwealth Bank",
+    "exchange": "ASX",
+    "country": "Australia",
+    "currency": "AUD",
+    "currencySymbol": "A$",
+    "sector": "Banking",
+    "volume": 366.77
+  },
+  {
+    "ticker": "WBC.AX",
+    "name": "Westpac Banking",
+    "exchange": "ASX",
+    "country": "Australia",
+    "currency": "AUD",
+    "currencySymbol": "A$",
+    "sector": "Banking",
+    "volume": 344.11
+  },
+  {
+    "ticker": "NAB.AX",
+    "name": "National Australia Bank",
+    "exchange": "ASX",
+    "country": "Australia",
+    "currency": "AUD",
+    "currencySymbol": "A$",
+    "sector": "Banking",
+    "volume": 355.88
+  },
+  {
+    "ticker": "ANZ.AX",
+    "name": "ANZ Group",
+    "exchange": "ASX",
+    "country": "Australia",
+    "currency": "AUD",
+    "currencySymbol": "A$",
+    "sector": "Banking",
+    "volume": 412.66
+  },
+  {
+    "ticker": "CSL.AX",
+    "name": "CSL Ltd",
+    "exchange": "ASX",
+    "country": "Australia",
+    "currency": "AUD",
+    "currencySymbol": "A$",
+    "sector": "Healthcare",
+    "volume": 398.55
+  },
+  {
+    "ticker": "FMG.AX",
+    "name": "Fortescue Metals",
+    "exchange": "ASX",
+    "country": "Australia",
+    "currency": "AUD",
+    "currencySymbol": "A$",
+    "sector": "Mining",
+    "volume": 477.90
+  },
+  {
+    "ticker": "WES.AX",
+    "name": "Wesfarmers Ltd",
+    "exchange": "ASX",
+    "country": "Australia",
+    "currency": "AUD",
+    "currencySymbol": "A$",
+    "sector": "Retail",
+    "volume": 366.21
+  },
+  {
+    "ticker": "MQG.AX",
+    "name": "Macquarie Group",
+    "exchange": "ASX",
+    "country": "Australia",
+    "currency": "AUD",
+    "currencySymbol": "A$",
+    "sector": "Investment Banking",
+    "volume": 355.19
+  },
+  {
+    "ticker": "TLS.AX",
+    "name": "Telstra Corp",
+    "exchange": "ASX",
+    "country": "Australia",
+    "currency": "AUD",
+    "currencySymbol": "A$",
+    "sector": "Telecom",
+    "volume": 322.11
+  },
+  {
+    "ticker": "SAP.DE",
+    "name": "SAP SE",
+    "exchange": "XETRA",
+    "country": "Germany",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Enterprise Software",
+    "volume": 412.45
+  },
+  {
+    "ticker": "SIE.DE",
+    "name": "Siemens AG",
+    "exchange": "XETRA",
+    "country": "Germany",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Industrial",
+    "volume": 378.12
+  },
+  {
+    "ticker": "VOW3.DE",
+    "name": "Volkswagen AG",
+    "exchange": "XETRA",
+    "country": "Germany",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Automobile",
+    "volume": 455.88
+  },
+  {
+    "ticker": "BMW.DE",
+    "name": "BMW AG",
+    "exchange": "XETRA",
+    "country": "Germany",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Automobile",
+    "volume": 366.45
+  },
+  {
+    "ticker": "DTE.DE",
+    "name": "Deutsche Telekom AG",
+    "exchange": "XETRA",
+    "country": "Germany",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Telecom",
+    "volume": 332.90
+  },
+  {
+    "ticker": "ALV.DE",
+    "name": "Allianz SE",
+    "exchange": "XETRA",
+    "country": "Germany",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Insurance",
+    "volume": 421.77
+  },
+  {
+    "ticker": "BAS.DE",
+    "name": "BASF SE",
+    "exchange": "XETRA",
+    "country": "Germany",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Chemicals",
+    "volume": 389.66
+  },
+  {
+    "ticker": "BAYN.DE",
+    "name": "Bayer AG",
+    "exchange": "XETRA",
+    "country": "Germany",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Pharmaceuticals",
+    "volume": 344.11
+  },
+  {
+    "ticker": "ADS.DE",
+    "name": "Adidas AG",
+    "exchange": "XETRA",
+    "country": "Germany",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Consumer Goods",
+    "volume": 398.25
+  },
+  {
+    "ticker": "DB1.DE",
+    "name": "Deutsche Börse AG",
+    "exchange": "XETRA",
+    "country": "Germany",
+    "currency": "EUR",
+    "currencySymbol": "€",
+    "sector": "Financial Services",
+    "volume": 367.84
+  }
+]

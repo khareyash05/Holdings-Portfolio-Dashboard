@@ -1,0 +1,72 @@
+[
+  {
+    "name": "National Stock Exchange",
+    "shortName": "NSE",
+    "country": "India",
+    "currency": "INR",
+    "currencySymbol": "₹"
+  },
+  {
+    "name": "New York Stock Exchange",
+    "shortName": "NYSE",
+    "country": "United States",
+    "currency": "USD",
+    "currencySymbol": "$"
+  },
+  {
+    "name": "London Stock Exchange",
+    "shortName": "LSE",
+    "country": "United Kingdom",
+    "currency": "GBP",
+    "currencySymbol": "£"
+  },
+  {
+    "name": "Euronext",
+    "shortName": "EURONEXT",
+    "country": "Europe",
+    "currency": "EUR",
+    "currencySymbol": "€"
+  },
+  {
+    "name": "SIX Swiss Exchange",
+    "shortName": "SIX",
+    "country": "Switzerland",
+    "currency": "CHF",
+    "currencySymbol": "CHF"
+  },
+  {
+    "name": "Hong Kong Stock Exchange",
+    "shortName": "HKSE",
+    "country": "Hong Kong",
+    "currency": "HKD",
+    "currencySymbol": "HK$"
+  },
+  {
+    "name": "Toronto Stock Exchange",
+    "shortName": "TSX",
+    "country": "Canada",
+    "currency": "CAD",
+    "currencySymbol": "C$"
+  },
+  {
+    "name": "Tokyo Stock Exchange",
+    "shortName": "TSE",
+    "country": "Japan",
+    "currency": "JPY",
+    "currencySymbol": "¥"
+  },
+  {
+    "name": "Australian Securities Exchange",
+    "shortName": "ASX",
+    "country": "Australia",
+    "currency": "AUD",
+    "currencySymbol": "A$"
+  },
+  {
+    "name": "Deutsche Börse (XETRA)",
+    "shortName": "XETRA",
+    "country": "Germany",
+    "currency": "EUR",
+    "currencySymbol": "€"
+  }
+]
