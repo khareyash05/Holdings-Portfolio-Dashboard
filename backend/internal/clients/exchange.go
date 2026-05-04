@@ -23,7 +23,15 @@ type snapshotsResponse struct {
 }
 
 func NewExchangeClient(baseURL string) *ExchangeClient {
-	return &ExchangeClient{BaseURL: strings.TrimRight(baseURL, "/"), HTTP: &http.Client{Timeout: 5 * time.Second}}
+	t := &http.Transport{
+		MaxConnsPerHost:     50,
+		MaxIdleConnsPerHost: 50,
+		IdleConnTimeout:     90 * time.Second,
+	}
+	return &ExchangeClient{
+		BaseURL: strings.TrimRight(baseURL, "/"),
+		HTTP:    &http.Client{Timeout: 5 * time.Second, Transport: t},
+	}
 }
 
 func (c *ExchangeClient) Snapshots(ctx context.Context, exchange string) ([]models.PriceSnapshot, error) {

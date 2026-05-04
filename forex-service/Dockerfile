@@ -1,7 +1,7 @@
 FROM golang:1.22-alpine AS build
 WORKDIR /src
 COPY forex-service/go.mod ./
-RUN go mod download || true
+RUN go mod download 
 COPY forex-service/ ./
 RUN CGO_ENABLED=0 go build -o /out/forex-service .
 

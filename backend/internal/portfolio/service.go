@@ -30,7 +30,9 @@ type Service struct {
 	PriceCache    *cache.Redis[map[string]float64]
 	LastGoodPrice *cache.Redis[map[string]float64]
 	ForexCache    *cache.Redis[*clients.RatesResponse]
+	LastGoodForex *cache.Redis[*clients.RatesResponse]
 	snapSF        singleflight.Group
+	forexSF       singleflight.Group
 
 	// in-process holdings cache.for now, these are global , in future will be pinned by userID
 	holdingsMu sync.RWMutex
@@ -45,7 +47,7 @@ type Service struct {
 
 func New(db *gorm.DB, fx *clients.ForexClient, ex *clients.ExchangeClient,
 	priceCache *cache.Redis[map[string]float64], lastGoodPrice *cache.Redis[map[string]float64],
-	forexCache *cache.Redis[*clients.RatesResponse]) *Service {
+	forexCache *cache.Redis[*clients.RatesResponse], lastGoodForex *cache.Redis[*clients.RatesResponse]) *Service {
 	return &Service{
 		DB:            db,
 		Forex:         fx,
@@ -53,6 +55,7 @@ func New(db *gorm.DB, fx *clients.ForexClient, ex *clients.ExchangeClient,
 		PriceCache:    priceCache,
 		LastGoodPrice: lastGoodPrice,
 		ForexCache:    forexCache,
+		LastGoodForex: lastGoodForex,
 	}
 }
 
@@ -177,14 +180,44 @@ func (s *Service) snapshotsFor(ctx context.Context, exchange string) (map[string
 	return r.prices, r.stale, nil
 }
 
-func (s *Service) ratesINR(ctx context.Context) (*clients.RatesResponse, error) {
-	return s.ForexCache.GetOrLoad(ctx, "INR", func() (*clients.RatesResponse, error) {
-		return s.Forex.Rates(ctx, "INR")
+type forexResult struct {
+	rates *clients.RatesResponse
+	stale bool
+}
+
+func (s *Service) ratesINR(ctx context.Context) (*clients.RatesResponse, bool, error) {
+	if v, ok, err := s.ForexCache.Get(ctx, "INR"); err == nil && ok {
+		return v, false, nil
+	}
+
+	res, err, _ := s.forexSF.Do("INR", func() (any, error) {
+		if v, ok, err := s.ForexCache.Get(ctx, "INR"); err == nil && ok {
+			return forexResult{rates: v, stale: false}, nil
+		}
+		v, ferr := s.Forex.Rates(ctx, "INR")
+		if ferr != nil {
+			if g, ok, gerr := s.LastGoodForex.Get(ctx, "INR"); gerr == nil && ok {
+				return forexResult{rates: g, stale: true}, nil
+			}
+			return forexResult{}, ferr
+		}
+		if serr := s.ForexCache.Set(ctx, "INR", v); serr != nil {
+			log.Printf("forex cache set: %v", serr)
+		}
+		if serr := s.LastGoodForex.Set(ctx, "INR", v); serr != nil {
+			log.Printf("lastgood-forex set: %v", serr)
+		}
+		return forexResult{rates: v, stale: false}, nil
 	})
+	if err != nil {
+		return nil, true, err
+	}
+	r := res.(forexResult)
+	return r.rates, r.stale, nil
 }
 
 func (s *Service) SupportedCurrencies(ctx context.Context) ([]string, error) {
-	r, err := s.ratesINR(ctx)
+	r, _, err := s.ratesINR(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +236,7 @@ func (s *Service) Portfolio(ctx context.Context, baseCurrency string) (*models.P
 	}
 
 	// fetch base rates from cache
-	rates, err := s.ratesINR(ctx)
+	rates, ratesStale, err := s.ratesINR(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("forex: %w", err)
 	}
@@ -252,14 +285,14 @@ func (s *Service) Portfolio(ctx context.Context, baseCurrency string) (*models.P
 
 	views := make([]models.HoldingView, 0, len(holdings))
 	var totalNet, totalInvested float64
-	anyStale := false
+	anyStale := ratesStale
 	for _, h := range holdings {
 		prices, hasPrices := priceMap[h.Exchange]
 		curLocal, hasTicker := 0.0, false
 		if hasPrices {
 			curLocal, hasTicker = prices[h.Ticker], true
 		}
-		stale := staleEx[h.Exchange]
+		stale := staleEx[h.Exchange] || ratesStale
 		if !hasTicker {
 			curLocal = h.BoughtPrice
 			stale = true

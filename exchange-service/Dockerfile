@@ -1,7 +1,7 @@
 FROM golang:1.22-alpine AS build
 WORKDIR /src
 COPY exchange-service/go.mod ./
-RUN go mod download || true
+RUN go mod download 
 COPY exchange-service/ ./
 RUN CGO_ENABLED=0 go build -o /out/exchange-service .
 

@@ -71,10 +71,14 @@ func main() {
 	priceCache := cache.NewRedis[map[string]float64](rdb, "price", cfg.PriceCacheTTL)
 	lastGoodPrice := cache.NewRedis[map[string]float64](rdb, "lastgood-price", cfg.LastGoodTTL)
 	forexCache := cache.NewRedis[*clients.RatesResponse](rdb, "forex", cfg.ForexCacheTTL)
-	svc := portfolio.New(gdb, forexClient, exchangeClient, priceCache, lastGoodPrice, forexCache)
+	lastGoodForex := cache.NewRedis[*clients.RatesResponse](rdb, "lastgood-forex", cfg.LastGoodTTL)
+	svc := portfolio.New(gdb, forexClient, exchangeClient, priceCache, lastGoodPrice, forexCache, lastGoodForex)
 	srv := &http.Server{
-		Addr:              cfg.ListenAddr,
-		Handler:           (&api.Server{Portfolio: svc, StreamInterval: cfg.PriceCacheTTL}).Routes(),
+		Addr: cfg.ListenAddr,
+		Handler: (&api.Server{
+			Portfolio:      svc,
+			StreamInterval: cfg.PriceCacheTTL,
+		}).Routes(),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 

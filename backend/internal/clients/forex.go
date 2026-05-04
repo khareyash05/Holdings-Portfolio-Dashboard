@@ -23,7 +23,15 @@ type RatesResponse struct {
 }
 
 func NewForexClient(baseURL string) *ForexClient {
-	return &ForexClient{BaseURL: strings.TrimRight(baseURL, "/"), HTTP: &http.Client{Timeout: 5 * time.Second}}
+	t := &http.Transport{
+		MaxConnsPerHost:     20,
+		MaxIdleConnsPerHost: 20,
+		IdleConnTimeout:     90 * time.Second,
+	}
+	return &ForexClient{
+		BaseURL: strings.TrimRight(baseURL, "/"),
+		HTTP:    &http.Client{Timeout: 5 * time.Second, Transport: t},
+	}
 }
 
 func (c *ForexClient) Rates(ctx context.Context, base string) (*RatesResponse, error) {
