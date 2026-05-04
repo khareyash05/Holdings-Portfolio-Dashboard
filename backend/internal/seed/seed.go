@@ -157,10 +157,12 @@ func (s *Seeder) Run(ctx context.Context) error {
 // a simple way to show variance across prices, using salt and ticker here
 // we hash (salt| ticker) and divide it by 10000 such because our holdings lies in 10000's
 // this results in varied continuous factor from the bought price
+// the salt is used such that across different deployment, the values remain same
+// also this ensures that while testing ,tests always pass
 func boughtFactor(salt, ticker string) float64 {
-	h := fnv.New64a() // can use crypto/sha256 here as well, but this library is lightweight in nautre, and crypt/sha256 generates big numbers which we don't need for this scrope
+	h := fnv.New64a() // can use crypto/sha256(involves cryptography which is an overkill here) here as well, but this library is lightweight in nature and not do overengineering.
 	h.Write([]byte(salt + "|" + ticker))
-	return 0.7 + float64(h.Sum64()%550)/1000
+	return 0.7 + float64(h.Sum64()%550)/1000 // 550 is a random number , ensures about 45% false rates, easier to show both sides, not used 500, might show fight alternate intervals
 }
 
 func round2(v float64) float64 {

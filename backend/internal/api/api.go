@@ -1,9 +1,11 @@
 package api
 
 import (
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -12,7 +14,7 @@ import (
 )
 
 const (
-	fallbackStreamInterval  = 3 * time.Second // fallback when StreamInternval is 0
+	fallbackStreamInterval  = 3 * time.Second // fallback when StreamInternval is 0(introduced for decoupling on interval fetches between backend and exchange service)
 	minStreamInterval       = 1 * time.Second // minimum wait for streamInterval
 	portfolioRequestTimeout = 5 * time.Second // bounds the non-streaming /api/portfolio call , safe check to not pin a goroutine forever
 )
@@ -20,16 +22,24 @@ const (
 type Server struct {
 	Portfolio      *portfolio.Service
 	StreamInterval time.Duration
+	RateLimiter    *IPLimiter
 }
 
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", s.handleHealth)
 	mux.HandleFunc("/api/health", s.handleHealth)
-	mux.HandleFunc("/api/portfolio", s.handlePortfolio)
-	mux.HandleFunc("/api/portfolio/stream", s.handlePortfolioStream)
-	mux.HandleFunc("/api/currencies", s.handleCurrencies)
-	mux.HandleFunc("/api/exchanges", s.handleExchanges)
+
+	rateLimiterMiddleware := func(h http.HandlerFunc) http.Handler {
+		if s.RateLimiter == nil {
+			return h
+		}
+		return s.RateLimiter.Middleware(h)
+	}
+	mux.Handle("/api/portfolio", rateLimiterMiddleware(s.handlePortfolio))
+	mux.Handle("/api/portfolio/stream", rateLimiterMiddleware(s.handlePortfolioStream))
+	mux.Handle("/api/currencies", rateLimiterMiddleware(s.handleCurrencies))
+	mux.Handle("/api/exchanges", rateLimiterMiddleware(s.handleExchanges))
 	return withCORS(mux)
 }
 
@@ -83,6 +93,21 @@ func (s *Server) handlePortfolioStream(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/event-stream") //SSE
 	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("Cache-Control", "no-cache")
+
+	// introducing a gzip compression on data sent on the SSE stream(tested --> resulted in 3.1x compression, when scaling this results in about 3x lower bills)
+	// ideally ,we should do it on some CDN layer, but this is a kind of fallback
+	var (
+		out io.Writer = w
+		gz  *gzip.Writer
+	)
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Vary", "Accept-Encoding")
+		gz, _ = gzip.NewWriterLevel(w, gzip.BestSpeed)
+		defer gz.Close()
+		out = gz
+	}
 	w.WriteHeader(http.StatusOK)
 
 	// sending portfolio after marshalling
@@ -90,8 +115,13 @@ func (s *Server) handlePortfolioStream(w http.ResponseWriter, r *http.Request) {
 		resp, err := s.Portfolio.Portfolio(r.Context(), base)
 		if err != nil {
 			payload, _ := json.Marshal(map[string]string{"error": err.Error()})
-			if _, werr := fmt.Fprintf(w, "event: app-error\ndata: %s\n\n", payload); werr != nil {
+			if _, werr := fmt.Fprintf(out, "event: app-error\ndata: %s\n\n", payload); werr != nil {
 				return false
+			}
+			if gz != nil {
+				if ferr := gz.Flush(); ferr != nil {
+					return false
+				}
 			}
 			flusher.Flush()
 			return true
@@ -100,15 +130,18 @@ func (s *Server) handlePortfolioStream(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return false
 		}
-		if _, werr := fmt.Fprintf(w, "data: %s\n\n", payload); werr != nil {
+		if _, werr := fmt.Fprintf(out, "data: %s\n\n", payload); werr != nil {
 			return false
+		}
+		if gz != nil {
+			if ferr := gz.Flush(); ferr != nil {
+				return false
+			}
 		}
 		flusher.Flush()
 		return true
 	}
 
-	// send immediately on connect, before the ticker starts
-	// without this, there will be a loading screen for 3s initially
 	if !send() {
 		return
 	}

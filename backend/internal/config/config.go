@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -17,6 +18,11 @@ type Config struct {
 	StocksDataPath  string
 	ExchangesPath   string
 	SeedSalt        string
+	// introducing a token bucket algorithm for rate limiting
+	// the tokens are filled after a specific interval
+	// each token is consumed when a request is sent
+	RateLimitRPS   float64 // rate of refilling tokens per second
+	RateLimitBurst int     // number of tokens in the bucket
 }
 
 func Load() Config {
@@ -32,6 +38,8 @@ func Load() Config {
 		StocksDataPath:  envOr("STOCKS_DATA", "/app/data/stocks.json"),
 		ExchangesPath:   envOr("EXCHANGES_DATA", "/app/data/exchanges.json"),
 		SeedSalt:        envOr("SEED_SALT", "paasa"),
+		RateLimitRPS:    envFloat("RATE_LIMIT_RPS", 10),
+		RateLimitBurst:  envInt("RATE_LIMIT_BURST", 20),
 	}
 }
 
@@ -52,4 +60,28 @@ func envDuration(k string, def time.Duration) time.Duration {
 		return def
 	}
 	return d
+}
+
+func envFloat(k string, def float64) float64 {
+	v := os.Getenv(k)
+	if v == "" {
+		return def
+	}
+	f, err := strconv.ParseFloat(v, 64)
+	if err != nil {
+		return def
+	}
+	return f
+}
+
+func envInt(k string, def int) int {
+	v := os.Getenv(k)
+	if v == "" {
+		return def
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		return def
+	}
+	return n
 }

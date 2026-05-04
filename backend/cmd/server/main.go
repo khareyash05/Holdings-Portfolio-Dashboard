@@ -73,11 +73,13 @@ func main() {
 	forexCache := cache.NewRedis[*clients.RatesResponse](rdb, "forex", cfg.ForexCacheTTL)
 	lastGoodForex := cache.NewRedis[*clients.RatesResponse](rdb, "lastgood-forex", cfg.LastGoodTTL)
 	svc := portfolio.New(gdb, forexClient, exchangeClient, priceCache, lastGoodPrice, forexCache, lastGoodForex)
+	ipLimiter := api.NewIPLimiter(cfg.RateLimitRPS, cfg.RateLimitBurst)
 	srv := &http.Server{
 		Addr: cfg.ListenAddr,
 		Handler: (&api.Server{
 			Portfolio:      svc,
 			StreamInterval: cfg.PriceCacheTTL,
+			RateLimiter:    ipLimiter,
 		}).Routes(),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
