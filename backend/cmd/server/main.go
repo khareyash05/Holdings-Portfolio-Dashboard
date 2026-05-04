@@ -74,7 +74,7 @@ func main() {
 	svc := portfolio.New(gdb, forexClient, exchangeClient, priceCache, lastGoodPrice, forexCache)
 	srv := &http.Server{
 		Addr:              cfg.ListenAddr,
-		Handler:           (&api.Server{Portfolio: svc}).Routes(),
+		Handler:           (&api.Server{Portfolio: svc, StreamInterval: cfg.PriceCacheTTL}).Routes(),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 

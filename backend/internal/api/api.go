@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,12 +12,14 @@ import (
 )
 
 const (
-	defaultStreamInterval = 3 * time.Second // 3s tick, it is matched with price cache TTL
-	minStreamInterval     = 1 * time.Second
+	fallbackStreamInterval  = 3 * time.Second // fallback when StreamInternval is 0
+	minStreamInterval       = 1 * time.Second // minimum wait for streamInterval
+	portfolioRequestTimeout = 5 * time.Second // bounds the non-streaming /api/portfolio call , safe check to not pin a goroutine forever
 )
 
 type Server struct {
-	Portfolio *portfolio.Service
+	Portfolio      *portfolio.Service
+	StreamInterval time.Duration
 }
 
 func (s *Server) Routes() http.Handler {
@@ -39,7 +42,9 @@ func (s *Server) handlePortfolio(w http.ResponseWriter, r *http.Request) {
 	if base == "" {
 		base = "INR"
 	}
-	resp, err := s.Portfolio.Portfolio(r.Context(), base)
+	ctx, cancel := context.WithTimeout(r.Context(), portfolioRequestTimeout)
+	defer cancel()
+	resp, err := s.Portfolio.Portfolio(ctx, base)
 	if err != nil {
 		writeJSON(w, http.StatusBadGateway, map[string]string{"error": err.Error()})
 		return
@@ -66,7 +71,10 @@ func (s *Server) handlePortfolioStream(w http.ResponseWriter, r *http.Request) {
 		base = "INR"
 	}
 
-	interval := defaultStreamInterval
+	interval := s.StreamInterval
+	if interval < minStreamInterval {
+		interval = fallbackStreamInterval
+	}
 	if v := r.URL.Query().Get("interval"); v != "" {
 		if d, err := time.ParseDuration(v); err == nil && d >= minStreamInterval {
 			interval = d

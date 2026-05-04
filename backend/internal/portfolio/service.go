@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"golang.org/x/sync/singleflight"
 	"gorm.io/gorm"
 
 	"github.com/khareyash05/Holdings-Portfolio-Dashboard/internal/cache"
@@ -17,15 +18,29 @@ import (
 	"github.com/khareyash05/Holdings-Portfolio-Dashboard/internal/models"
 )
 
+const (
+	holdingsCacheTTL  = 30 * time.Second
+	exchangesCacheTTL = 5 * time.Minute
+)
+
 type Service struct {
-	DB             *gorm.DB
-	Forex          *clients.ForexClient
-	Exchange       *clients.ExchangeClient
-	PriceCache     *cache.Redis[map[string]float64]
-	LastGoodPrice  *cache.Redis[map[string]float64]
-	ForexCache     *cache.Redis[*clients.RatesResponse]
-	exchangesMu    sync.RWMutex
-	exchangesAll   []models.Exchange
+	DB            *gorm.DB
+	Forex         *clients.ForexClient
+	Exchange      *clients.ExchangeClient
+	PriceCache    *cache.Redis[map[string]float64]
+	LastGoodPrice *cache.Redis[map[string]float64]
+	ForexCache    *cache.Redis[*clients.RatesResponse]
+	snapSF        singleflight.Group
+
+	// in-process holdings cache.for now, these are global , in future will be pinned by userID
+	holdingsMu sync.RWMutex
+	holdings   []holdingRow
+	holdingsAt time.Time
+
+	// exchanges list cache with TTL
+	exchangesMu  sync.RWMutex
+	exchangesAll []models.Exchange
+	exchangesAt  time.Time
 }
 
 func New(db *gorm.DB, fx *clients.ForexClient, ex *clients.ExchangeClient,
@@ -53,20 +68,41 @@ type holdingRow struct {
 }
 
 func (s *Service) loadHoldings(ctx context.Context) ([]holdingRow, error) {
-	var out []holdingRow
+
+	// fast check on holdingCache first
+	s.holdingsMu.RLock()
+	if s.holdings != nil && time.Since(s.holdingsAt) < holdingsCacheTTL {
+		out := make([]holdingRow, len(s.holdings))
+		copy(out, s.holdings)
+		s.holdingsMu.RUnlock()
+		return out, nil
+	}
+	s.holdingsMu.RUnlock()
+
+	var rows []holdingRow
 	err := s.DB.WithContext(ctx).
 		Table("holdings").
 		Select("s.ticker, s.name, s.exchange_short_name, s.country, s.currency, s.sector, holdings.quantity, holdings.bought_price_local").
 		Joins("JOIN stocks s ON s.ticker = holdings.ticker").
 		Order("s.exchange_short_name, s.ticker").
-		Scan(&out).Error
-	return out, err
+		Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+
+	s.holdingsMu.Lock()
+	s.holdings = rows
+	s.holdingsAt = time.Now()
+	s.holdingsMu.Unlock()
+
+	out := make([]holdingRow, len(rows))
+	copy(out, rows)
+	return out, nil
 }
 
 func (s *Service) Exchanges(ctx context.Context) ([]models.Exchange, error) {
-	// list all exchanges in the cache
 	s.exchangesMu.RLock()
-	if len(s.exchangesAll) > 0 {
+	if len(s.exchangesAll) > 0 && time.Since(s.exchangesAt) < exchangesCacheTTL {
 		out := make([]models.Exchange, len(s.exchangesAll))
 		copy(out, s.exchangesAll)
 		s.exchangesMu.RUnlock()
@@ -74,15 +110,28 @@ func (s *Service) Exchanges(ctx context.Context) ([]models.Exchange, error) {
 	}
 	s.exchangesMu.RUnlock()
 
-	// also get from db if some new exchange was added and sync it to the cachemap
-	var out []models.Exchange
-	if err := s.DB.WithContext(ctx).Order("short_name").Find(&out).Error; err != nil {
+	s.exchangesMu.Lock()
+	defer s.exchangesMu.Unlock()
+	if len(s.exchangesAll) > 0 && time.Since(s.exchangesAt) < exchangesCacheTTL {
+		out := make([]models.Exchange, len(s.exchangesAll))
+		copy(out, s.exchangesAll)
+		return out, nil
+	}
+
+	var fresh []models.Exchange
+	if err := s.DB.WithContext(ctx).Order("short_name").Find(&fresh).Error; err != nil {
 		return nil, err
 	}
-	s.exchangesMu.Lock()
-	s.exchangesAll = out
-	s.exchangesMu.Unlock()
+	s.exchangesAll = fresh
+	s.exchangesAt = time.Now()
+	out := make([]models.Exchange, len(fresh))
+	copy(out, fresh)
 	return out, nil
+}
+
+type snapshotResult struct {
+	prices map[string]float64
+	stale  bool
 }
 
 func (s *Service) snapshotsFor(ctx context.Context, exchange string) (map[string]float64, bool, error) {
@@ -92,25 +141,40 @@ func (s *Service) snapshotsFor(ctx context.Context, exchange string) (map[string
 		return v, false, nil
 	}
 
-	snaps, err := s.Exchange.Snapshots(ctx, exchange)
-	if err != nil {
-		if v, ok, gerr := s.LastGoodPrice.Get(ctx, key); gerr == nil && ok {
-			return v, true, nil
+	// Cache miss -- merge concurrent upstream fetches for the same exchange.
+	// Without singleflight, every goroutine that arrived during the miss window
+	// would each call exchange-service independently.
+	res, err, _ := s.snapSF.Do(key, func() (any, error) {
+		// rechecking the cache as another goroutine might have filled it
+		if v, ok, gerr := s.PriceCache.Get(ctx, key); gerr == nil && ok {
+			return snapshotResult{prices: v, stale: false}, nil
 		}
+		snaps, ferr := s.Exchange.Snapshots(ctx, exchange)
+		if ferr != nil {
+			// the exchange service wasn't connected, fallback to the last price 
+			if v, ok, gerr := s.LastGoodPrice.Get(ctx, key); gerr == nil && ok {
+				return snapshotResult{prices: v, stale: true}, nil
+			}
+			return snapshotResult{stale: true}, ferr
+		}
+		m := make(map[string]float64, len(snaps))
+		for _, q := range snaps {
+			m[q.Ticker] = q.Price
+		}
+		// update both the caches(price cache -> exchange up, LastGoodPrice -> exchange down)
+		if serr := s.PriceCache.Set(ctx, key, m); serr != nil {
+			log.Printf("price cache set %s: %v", key, serr)
+		}
+		if serr := s.LastGoodPrice.Set(ctx, key, m); serr != nil {
+			log.Printf("lastgood cache set %s: %v", key, serr)
+		}
+		return snapshotResult{prices: m, stale: false}, nil
+	})
+	if err != nil {
 		return nil, true, err
 	}
-
-	m := make(map[string]float64, len(snaps))
-	for _, q := range snaps {
-		m[q.Ticker] = q.Price
-	}
-	if serr := s.PriceCache.Set(ctx, key, m); serr != nil {
-		log.Printf("price cache set %s: %v", key, serr)
-	}
-	if serr := s.LastGoodPrice.Set(ctx, key, m); serr != nil {
-		log.Printf("lastgood cache set %s: %v", key, serr)
-	}
-	return m, false, nil
+	r := res.(snapshotResult)
+	return r.prices, r.stale, nil
 }
 
 func (s *Service) ratesINR(ctx context.Context) (*clients.RatesResponse, error) {
