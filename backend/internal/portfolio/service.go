@@ -26,7 +26,7 @@ type Service struct {
 	Forex         *clients.ForexClient
 	Exchange      *clients.ExchangeClient
 	PriceCache    *cache.Redis[map[string]float64]
-	LastGoodPrice *cache.Redis[map[string]float64]
+	LastGoodPrice *cache.Redis[map[string]float64] // used when the hot cache misses and upstream fails (returns stale flag)
 	ForexCache    *cache.Redis[*clients.RatesResponse]
 	LastGoodForex *cache.Redis[*clients.RatesResponse] // used when the hot cache misses and upstream fails (returns stale flag)
 

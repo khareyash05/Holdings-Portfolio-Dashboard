@@ -40,10 +40,6 @@ export function App() {
           <Holdings holdings={data.holdings} baseCurrency={data.baseCurrency} />
         </>
       )}
-
-      <footer className="mt-12 border-t border-border pt-4 text-xs text-muted-foreground">
-        Paasa Portfolio
-      </footer>
     </div>
   );
 }

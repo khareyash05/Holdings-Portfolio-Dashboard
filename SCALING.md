@@ -32,14 +32,10 @@ Right Now, the biggest issue with price calculation is its non determinism. It's
 ### Holdings cache invalidation via Redis pub/sub
 Today holdings are cached for 30s globally. At scale, key by user-id and invalidate on `holdings:user:{id}` will be better and easier for lookups
 
-### DB connection pool tuning
-GORM's default pool is effectively unbounded. Under burst load this can open more connections than Postgres can accept. Setting `MaxOpenConns`, `MaxIdleConns`, `ConnMaxLifetime` keeps the pool bounded and prevents pod restarts from blowing up the DB.
-
 ### Observability
 Add Prometheus metrics (request rate, cache hit ratio, SSE conns held, upstream latency). Currently the only signal is logs.
 
 ### Postgres sharding
-Defer until trades exceed ~1k/sec — at 1M users the current load is ~12 writes/sec, nowhere close. When it does matter, shard by `user_id` and route reads via PgBouncer.
 
 ### Auth and per-user holdings
 v1 has a single global holdings set. Real product needs JWT (or session in Redis) + per-user `holdings.user_id`, with the per-user holdings cache above.

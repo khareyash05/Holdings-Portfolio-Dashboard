@@ -33,12 +33,6 @@ func main() {
 		defer sdb.Close()
 	}
 
-	// db migration(tables setup)
-	if err := db.Migrate(gdb); err != nil {
-		log.Fatalf("migrate: %v", err)
-	}
-	log.Printf("db migrated")
-
 	// setup clients to connect to other services
 	exchangeClient := clients.NewExchangeClient(cfg.ExchangeBaseURL)
 	forexClient := clients.NewForexClient(cfg.ForexBaseURL)

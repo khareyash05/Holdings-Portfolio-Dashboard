@@ -26,8 +26,6 @@ type snapshotsResponse struct {
 
 func NewExchangeClient(baseURL string) *ExchangeClient {
 	t := &http.Transport{
-		MaxConnsPerHost:     50,
-		MaxIdleConnsPerHost: 50,
 		IdleConnTimeout:     90 * time.Second,
 	}
 	return &ExchangeClient{

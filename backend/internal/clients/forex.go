@@ -27,8 +27,6 @@ type RatesResponse struct {
 
 func NewForexClient(baseURL string) *ForexClient {
 	t := &http.Transport{
-		MaxConnsPerHost:     20,
-		MaxIdleConnsPerHost: 20,
 		IdleConnTimeout:     90 * time.Second,
 	}
 	return &ForexClient{

@@ -84,7 +84,7 @@ func (s *Server) handleExchanges(w http.ResponseWriter, r *http.Request) {
 // 2. Flush after every event
 // 3. Stop work when the client leaves
 func (s *Server) handlePortfolioStream(w http.ResponseWriter, r *http.Request) {
-	// Ensure the response writer supports streaming (SSE requires flushing)
+	// Ensure the response writer supports streaming 
 	flusher, ok := s.ensureFlusher(w)
 	if !ok {
 		return
