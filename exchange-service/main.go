@@ -1,9 +1,8 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/binary"
 	"encoding/json"
+	"hash/fnv"
 	"log"
 	"math/rand/v2"
 	"net/http"
@@ -51,13 +50,25 @@ func loadJSON(path string, v any) error {
 	return json.Unmarshal(b, v)
 }
 
-// priceFor a sha256-seeded base
-// price per ticker, plus +/-2% uniform noise per call
+// computes current price
+// other way could have been calling the db for the bought price
+// but then this service would have been dependent on backend service, which it ideally shouldn't be
+// as its responsibility is to send current price
+// therefore made this independent by creating a hash per stock and then calculating final price from there
+// the bought price and current price has no relations with it right now, which is the realistic condition of markets
 func priceFor(symbol, currency string) float64 {
-	sum := sha256.Sum256([]byte(symbol))
-	seed := binary.BigEndian.Uint32(sum[:4])
-	base := basePrice(currency, seed)
-	return base * (1 + (rand.Float64()-0.5)*0.04)
+	// hash the ticker, this remains same for a stock here
+	h := fnv.New32a()
+	h.Write([]byte(symbol))
+
+	// pick a base price in the currency-appropriate band
+	base := basePrice(currency, h.Sum32())
+
+	centered := rand.Float64() - 0.5 // uniform random shifted to [-0.5, 0.5)
+	wobble := centered * 0.04        // scale to +-2% wobble
+	multiplier := 1 + wobble         // muliplier to 1 for factor
+
+	return base * multiplier
 }
 
 // base price ranges across exchanges

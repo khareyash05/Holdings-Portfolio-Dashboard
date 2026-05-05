@@ -9,6 +9,7 @@ import {
 import { formatMoney, formatPct } from "@/lib/format";
 import type { Holding, GroupBy } from "@/types";
 import { bucketsFor } from "@/lib/buckets";
+import { AllocationChart } from "./chart";
 
 interface Props {
   holdings: Holding[];
@@ -65,27 +66,34 @@ export function Buckets({ holdings, baseCurrency }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] border border-border">
-        {sorted.map((b) => {
-          const cls = b.gainAbs >= 0 ? "text-pos" : "text-neg";
-          return (
-            <div key={b.key} className="border-b border-r border-border/50 p-3">
-              <div className="flex items-baseline justify-between text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">{b.key}</span>
-                <span>{b.count}</span>
+      <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] border border-border self-start">
+          {sorted.map((b) => {
+            const cls = b.gainAbs >= 0 ? "text-pos" : "text-neg";
+            return (
+              <div
+                key={b.key}
+                className="border-b border-r border-border/50 p-3"
+              >
+                <div className="flex items-baseline justify-between text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">{b.key}</span>
+                  <span>{b.count}</span>
+                </div>
+                <div className="mt-1.5 text-lg tabular-nums">
+                  {formatMoney(b.current, baseCurrency)}
+                </div>
+                <div className="flex justify-between text-xs tabular-nums">
+                  <span className={cls}>{formatPct(b.gainPct)}</span>
+                  <span className={cls}>
+                    {formatMoney(b.gainAbs, baseCurrency)}
+                  </span>
+                </div>
               </div>
-              <div className="mt-1.5 text-lg tabular-nums">
-                {formatMoney(b.current, baseCurrency)}
-              </div>
-              <div className="flex justify-between text-xs tabular-nums">
-                <span className={cls}>{formatPct(b.gainPct)}</span>
-                <span className={cls}>
-                  {formatMoney(b.gainAbs, baseCurrency)}
-                </span>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
+        <AllocationChart buckets={sorted} baseCurrency={baseCurrency} />
       </div>
     </section>
   );

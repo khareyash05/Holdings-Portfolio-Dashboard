@@ -53,15 +53,15 @@ func convertAmount(from, to string, amount float64) (float64, float64, error) {
 	from = strings.ToUpper(from)
 	to = strings.ToUpper(to)
 	rates := ratesINR()
-	rf, ok := rates[from]
+	ratesFrom, ok := rates[from]
 	if !ok {
 		return 0, 0, fmt.Errorf("unknown currency: %s", from)
 	}
-	rt, ok := rates[to]
+	ratesTo, ok := rates[to]
 	if !ok {
 		return 0, 0, fmt.Errorf("unknown currency: %s", to)
 	}
-	rate := rt / rf
+	rate := ratesTo / ratesFrom
 	return amount * rate, rate, nil
 }
 
@@ -77,14 +77,14 @@ func handleRates(w http.ResponseWriter, r *http.Request) {
 		base = "INR"
 	}
 	rates := ratesINR()
-	rb, ok := rates[base]
+	ratesByBase, ok := rates[base]
 	if !ok {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "unknown base currency"})
 		return
 	}
 	out := make(map[string]float64, len(rates))
 	for k, v := range rates {
-		out[k] = v / rb
+		out[k] = v / ratesByBase
 	}
 	writeJSON(w, http.StatusOK, ratesResponse{
 		Base:      base,
@@ -128,7 +128,7 @@ func main() {
 	mux.HandleFunc("/rates/convert", handleConvert)
 	mux.HandleFunc("/health", handleHealth)
 
-	log.Printf("forex-service listening on %s (loaded %d rates)", addr, len(forex.INR))
+	log.Printf("forex-service listening on %s ", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(err)
 	}
