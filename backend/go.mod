@@ -1,6 +1,8 @@
 module github.com/khareyash05/Holdings-Portfolio-Dashboard
 
-go 1.22
+go 1.22.0
+
+toolchain go1.24.5
 
 require (
 	github.com/redis/go-redis/v9 v9.6.1
@@ -18,6 +20,7 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/sony/gobreaker/v2 v2.4.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
