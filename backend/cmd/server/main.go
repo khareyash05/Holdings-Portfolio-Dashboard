@@ -17,7 +17,6 @@ import (
 	"github.com/khareyash05/Holdings-Portfolio-Dashboard/internal/portfolio"
 	"github.com/khareyash05/Holdings-Portfolio-Dashboard/internal/seed"
 	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -25,7 +24,8 @@ func main() {
 	rootCtx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	gdb, err := connectWithRetry(rootCtx, cfg.DatabaseURL, 30)
+	// connect to postgres
+	gdb, err := db.Connect(cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("connect db: %v", err)
 	}
@@ -33,27 +33,21 @@ func main() {
 		defer sdb.Close()
 	}
 
+	// db migration(tables setup)
 	if err := db.Migrate(gdb); err != nil {
 		log.Fatalf("migrate: %v", err)
 	}
 	log.Printf("db migrated")
 
+	// setup clients to connect to other services
 	exchangeClient := clients.NewExchangeClient(cfg.ExchangeBaseURL)
 	forexClient := clients.NewForexClient(cfg.ForexBaseURL)
 
-	if err := waitForService(rootCtx, cfg.ExchangeBaseURL+"/health", 30); err != nil {
-		log.Fatalf("exchange-service unreachable: %v", err)
-	}
-	if err := waitForService(rootCtx, cfg.ForexBaseURL+"/health", 30); err != nil {
-		log.Fatalf("forex-service unreachable: %v", err)
-	}
-
+	// seeding bought prices for holdings
 	seeder := &seed.Seeder{
 		DB:            gdb,
 		StocksPath:    cfg.StocksDataPath,
 		ExchangesPath: cfg.ExchangesPath,
-		Exchange:      exchangeClient,
-		Salt:          cfg.SeedSalt,
 	}
 	if err := seeder.Run(rootCtx); err != nil {
 		log.Fatalf("seed: %v", err)
@@ -62,17 +56,25 @@ func main() {
 	if cfg.RedisURL == "" {
 		log.Fatal("REDIS_URL is required")
 	}
-	rdb, err := connectRedisWithRetry(rootCtx, cfg.RedisURL, 15)
+	opt, err := redis.ParseURL(cfg.RedisURL)
 	if err != nil {
+		log.Fatalf("parse redis url: %v", err)
+	}
+	rdb := redis.NewClient(opt)
+	if err := rdb.Ping(rootCtx).Err(); err != nil {
 		log.Fatalf("connect redis: %v", err)
 	}
 	defer rdb.Close()
 	log.Printf("cache: redis at %s", cfg.RedisURL)
+
 	priceCache := cache.NewRedis[map[string]float64](rdb, "price", cfg.PriceCacheTTL)
 	lastGoodPrice := cache.NewRedis[map[string]float64](rdb, "lastgood-price", cfg.LastGoodTTL)
 	forexCache := cache.NewRedis[*clients.RatesResponse](rdb, "forex", cfg.ForexCacheTTL)
 	lastGoodForex := cache.NewRedis[*clients.RatesResponse](rdb, "lastgood-forex", cfg.LastGoodTTL)
+
 	svc := portfolio.New(gdb, forexClient, exchangeClient, priceCache, lastGoodPrice, forexCache, lastGoodForex)
+
+	// setup rate limiter
 	ipLimiter := api.NewIPLimiter(cfg.RateLimitRPS, cfg.RateLimitBurst)
 	srv := &http.Server{
 		Addr: cfg.ListenAddr,
@@ -93,77 +95,10 @@ func main() {
 
 	<-rootCtx.Done()
 	log.Printf("shutting down...")
+
+	// ensuring graceful shutdown
 	shutdownCtx, c := context.WithTimeout(context.Background(), 10*time.Second)
 	defer c()
 	_ = srv.Shutdown(shutdownCtx)
 	os.Exit(0)
-}
-
-func connectWithRetry(ctx context.Context, url string, attempts int) (*gorm.DB, error) {
-	var lastErr error
-	for i := 0; i < attempts; i++ {
-		gdb, err := db.Connect(url)
-		if err == nil {
-			return gdb, nil
-		}
-		lastErr = err
-		log.Printf("db not ready (%d/%d): %v", i+1, attempts, err)
-		select {
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		case <-time.After(2 * time.Second):
-		}
-	}
-	return nil, lastErr
-}
-
-func connectRedisWithRetry(ctx context.Context, url string, attempts int) (*redis.Client, error) {
-	opt, err := redis.ParseURL(url)
-	if err != nil {
-		return nil, err
-	}
-	client := redis.NewClient(opt)
-	var lastErr error
-	for i := 0; i < attempts; i++ {
-		pingCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
-		err := client.Ping(pingCtx).Err()
-		cancel()
-		if err == nil {
-			return client, nil
-		}
-		lastErr = err
-		log.Printf("redis not ready (%d/%d): %v", i+1, attempts, err)
-		select {
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		case <-time.After(2 * time.Second):
-		}
-	}
-	_ = client.Close()
-	return nil, lastErr
-}
-
-func waitForService(ctx context.Context, url string, attempts int) error {
-	client := &http.Client{Timeout: 2 * time.Second}
-	var lastErr error
-	for i := 0; i < attempts; i++ {
-		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-		resp, err := client.Do(req)
-		if err == nil {
-			resp.Body.Close()
-			if resp.StatusCode == http.StatusOK {
-				return nil
-			}
-			lastErr = err
-		} else {
-			lastErr = err
-		}
-		log.Printf("waiting for %s (%d/%d)", url, i+1, attempts)
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(2 * time.Second):
-		}
-	}
-	return lastErr
 }

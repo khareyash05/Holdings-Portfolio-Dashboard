@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
-	"golang.org/x/sync/singleflight"
 	"gorm.io/gorm"
 
 	"github.com/khareyash05/Holdings-Portfolio-Dashboard/internal/cache"
@@ -30,9 +28,7 @@ type Service struct {
 	PriceCache    *cache.Redis[map[string]float64]
 	LastGoodPrice *cache.Redis[map[string]float64]
 	ForexCache    *cache.Redis[*clients.RatesResponse]
-	LastGoodForex *cache.Redis[*clients.RatesResponse]
-	snapSF        singleflight.Group
-	forexSF       singleflight.Group
+	LastGoodForex *cache.Redis[*clients.RatesResponse] // used when the hot cache misses and upstream fails (returns stale flag)
 
 	// in-process holdings cache.for now, these are global , in future will be pinned by userID
 	holdingsMu sync.RWMutex
@@ -104,6 +100,8 @@ func (s *Service) loadHoldings(ctx context.Context) ([]holdingRow, error) {
 }
 
 func (s *Service) Exchanges(ctx context.Context) ([]models.Exchange, error) {
+
+	// first check from hot cache,99% exchanges will be returned from here
 	s.exchangesMu.RLock()
 	if len(s.exchangesAll) > 0 && time.Since(s.exchangesAt) < exchangesCacheTTL {
 		out := make([]models.Exchange, len(s.exchangesAll))
@@ -113,6 +111,10 @@ func (s *Service) Exchanges(ctx context.Context) ([]models.Exchange, error) {
 	}
 	s.exchangesMu.RUnlock()
 
+	// failsafe check here
+	// if not found in cache, there might be a case where during the previous reading, a new field was added, we again need to check
+	// also update the cache here
+	// this helps in cases where the if 100 failed first step, if not this step, all 100 would call DB
 	s.exchangesMu.Lock()
 	defer s.exchangesMu.Unlock()
 	if len(s.exchangesAll) > 0 && time.Since(s.exchangesAt) < exchangesCacheTTL {
@@ -121,6 +123,7 @@ func (s *Service) Exchanges(ctx context.Context) ([]models.Exchange, error) {
 		return out, nil
 	}
 
+	// if again not found, query the db
 	var fresh []models.Exchange
 	if err := s.DB.WithContext(ctx).Order("short_name").Find(&fresh).Error; err != nil {
 		return nil, err
@@ -132,11 +135,6 @@ func (s *Service) Exchanges(ctx context.Context) ([]models.Exchange, error) {
 	return out, nil
 }
 
-type snapshotResult struct {
-	prices map[string]float64
-	stale  bool
-}
-
 func (s *Service) snapshotsFor(ctx context.Context, exchange string) (map[string]float64, bool, error) {
 	key := strings.ToUpper(exchange)
 
@@ -144,45 +142,27 @@ func (s *Service) snapshotsFor(ctx context.Context, exchange string) (map[string
 		return v, false, nil
 	}
 
-	// Cache miss -- merge concurrent upstream fetches for the same exchange.
-	// Without singleflight, every goroutine that arrived during the miss window
-	// would each call exchange-service independently.
-	res, err, _ := s.snapSF.Do(key, func() (any, error) {
-		// rechecking the cache as another goroutine might have filled it
-		if v, ok, gerr := s.PriceCache.Get(ctx, key); gerr == nil && ok {
-			return snapshotResult{prices: v, stale: false}, nil
+	snaps, ferr := s.Exchange.Snapshots(ctx, exchange)
+	if ferr != nil {
+		// the exchange service wasn't connected, fallback to the last price
+		if v, ok, gerr := s.LastGoodPrice.Get(ctx, key); gerr == nil && ok {
+			return v, true, nil
 		}
-		snaps, ferr := s.Exchange.Snapshots(ctx, exchange)
-		if ferr != nil {
-			// the exchange service wasn't connected, fallback to the last price 
-			if v, ok, gerr := s.LastGoodPrice.Get(ctx, key); gerr == nil && ok {
-				return snapshotResult{prices: v, stale: true}, nil
-			}
-			return snapshotResult{stale: true}, ferr
-		}
-		m := make(map[string]float64, len(snaps))
-		for _, q := range snaps {
-			m[q.Ticker] = q.Price
-		}
-		// update both the caches(price cache -> exchange up, LastGoodPrice -> exchange down)
-		if serr := s.PriceCache.Set(ctx, key, m); serr != nil {
-			log.Printf("price cache set %s: %v", key, serr)
-		}
-		if serr := s.LastGoodPrice.Set(ctx, key, m); serr != nil {
-			log.Printf("lastgood cache set %s: %v", key, serr)
-		}
-		return snapshotResult{prices: m, stale: false}, nil
-	})
-	if err != nil {
-		return nil, true, err
+		return nil, true, ferr
 	}
-	r := res.(snapshotResult)
-	return r.prices, r.stale, nil
-}
+	m := make(map[string]float64, len(snaps))
+	for _, q := range snaps {
+		m[q.Ticker] = q.Price
+	}
 
-type forexResult struct {
-	rates *clients.RatesResponse
-	stale bool
+	// update both the caches(price cache -> exchange up, LastGoodPrice -> exchange down)
+	if serr := s.PriceCache.Set(ctx, key, m); serr != nil {
+		log.Printf("price cache set %s: %v", key, serr)
+	}
+	if serr := s.LastGoodPrice.Set(ctx, key, m); serr != nil {
+		log.Printf("lastgood cache set %s: %v", key, serr)
+	}
+	return m, false, nil
 }
 
 func (s *Service) ratesINR(ctx context.Context) (*clients.RatesResponse, bool, error) {
@@ -190,30 +170,21 @@ func (s *Service) ratesINR(ctx context.Context) (*clients.RatesResponse, bool, e
 		return v, false, nil
 	}
 
-	res, err, _ := s.forexSF.Do("INR", func() (any, error) {
-		if v, ok, err := s.ForexCache.Get(ctx, "INR"); err == nil && ok {
-			return forexResult{rates: v, stale: false}, nil
+	// same flow as exchange service -> check cache -> if not found/error -> return lastgoodprice + stale flag
+	v, ferr := s.Forex.Rates(ctx, "INR")
+	if ferr != nil {
+		if g, ok, gerr := s.LastGoodForex.Get(ctx, "INR"); gerr == nil && ok {
+			return g, true, nil
 		}
-		v, ferr := s.Forex.Rates(ctx, "INR")
-		if ferr != nil {
-			if g, ok, gerr := s.LastGoodForex.Get(ctx, "INR"); gerr == nil && ok {
-				return forexResult{rates: g, stale: true}, nil
-			}
-			return forexResult{}, ferr
-		}
-		if serr := s.ForexCache.Set(ctx, "INR", v); serr != nil {
-			log.Printf("forex cache set: %v", serr)
-		}
-		if serr := s.LastGoodForex.Set(ctx, "INR", v); serr != nil {
-			log.Printf("lastgood-forex set: %v", serr)
-		}
-		return forexResult{rates: v, stale: false}, nil
-	})
-	if err != nil {
-		return nil, true, err
+		return nil, true, ferr
 	}
-	r := res.(forexResult)
-	return r.rates, r.stale, nil
+	if serr := s.ForexCache.Set(ctx, "INR", v); serr != nil {
+		log.Printf("forex cache set: %v", serr)
+	}
+	if serr := s.LastGoodForex.Set(ctx, "INR", v); serr != nil {
+		log.Printf("lastgood-forex set: %v", serr)
+	}
+	return v, false, nil
 }
 
 func (s *Service) SupportedCurrencies(ctx context.Context) ([]string, error) {
@@ -273,7 +244,6 @@ func (s *Service) Portfolio(ctx context.Context, baseCurrency string) (*models.P
 	for i := 0; i < len(exchanges); i++ {
 		r := <-ch
 		if r.err != nil {
-			log.Printf("exchange %s degraded: %v", r.ex, r.err)
 			staleEx[r.ex] = true
 			continue
 		}
@@ -356,38 +326,4 @@ func (s *Service) Portfolio(ctx context.Context, baseCurrency string) (*models.P
 		Holdings:  views,
 		Exchanges: exchangesList,
 	}, nil
-}
-
-func convertFactor(ratesINRBase map[string]float64, from, to string) (float64, error) {
-	from = strings.ToUpper(from)
-	to = strings.ToUpper(to)
-	if from == to {
-		return 1, nil
-	}
-	rFrom, ok := ratesINRBase[from]
-	if !ok {
-		return 0, fmt.Errorf("unsupported currency: %s", from)
-	}
-	rTo, ok := ratesINRBase[to]
-	if !ok {
-		return 0, fmt.Errorf("unsupported currency: %s", to)
-	}
-	if rFrom == 0 {
-		return 0, fmt.Errorf("zero rate for %s", from)
-	}
-	return rTo / rFrom, nil
-}
-
-func round2(v float64) float64 {
-	if math.IsNaN(v) || math.IsInf(v, 0) {
-		return 0
-	}
-	return math.Round(v*100) / 100
-}
-
-func round4(v float64) float64 {
-	if math.IsNaN(v) || math.IsInf(v, 0) {
-		return 0
-	}
-	return math.Round(v*10000) / 10000
 }

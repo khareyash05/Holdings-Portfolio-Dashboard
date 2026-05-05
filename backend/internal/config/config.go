@@ -17,7 +17,6 @@ type Config struct {
 	ForexCacheTTL   time.Duration
 	StocksDataPath  string
 	ExchangesPath   string
-	SeedSalt        string
 	// introducing a token bucket algorithm for rate limiting
 	// the tokens are filled after a specific interval
 	// each token is consumed when a request is sent
@@ -37,7 +36,6 @@ func Load() Config {
 		ForexCacheTTL:   envDuration("FOREX_CACHE_TTL", 60*time.Second),
 		StocksDataPath:  envOr("STOCKS_DATA", "/app/data/stocks.json"),
 		ExchangesPath:   envOr("EXCHANGES_DATA", "/app/data/exchanges.json"),
-		SeedSalt:        envOr("SEED_SALT", "paasa"),
 		RateLimitRPS:    envFloat("RATE_LIMIT_RPS", 10),
 		RateLimitBurst:  envInt("RATE_LIMIT_BURST", 20),
 	}

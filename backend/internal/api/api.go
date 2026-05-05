@@ -16,7 +16,7 @@ import (
 const (
 	fallbackStreamInterval  = 3 * time.Second // fallback when StreamInternval is 0(introduced for decoupling on interval fetches between backend and exchange service)
 	minStreamInterval       = 1 * time.Second // minimum wait for streamInterval
-	portfolioRequestTimeout = 5 * time.Second // bounds the non-streaming /api/portfolio call , safe check to not pin a goroutine forever
+	portfolioRequestTimeout = 5 * time.Second
 )
 
 type Server struct {
@@ -62,8 +62,26 @@ func (s *Server) handlePortfolio(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+func (s *Server) handleCurrencies(w http.ResponseWriter, r *http.Request) {
+	cs, err := s.Portfolio.SupportedCurrencies(r.Context())
+	if err != nil {
+		writeJSON(w, http.StatusBadGateway, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"currencies": cs})
+}
+
+func (s *Server) handleExchanges(w http.ResponseWriter, r *http.Request) {
+	es, err := s.Portfolio.Exchanges(r.Context())
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, es)
+}
+
 // handlePortfolioStream is the Server-Sent Events endpoint — a long-lived HTTP response that pushes a fresh
-// portfolio snapshot to one connected browser every 3 s
+// portfolio snapshot to one connected user every 3 s
 
 // SSE cases handled -
 // 1. Headers before any data write
@@ -81,6 +99,7 @@ func (s *Server) handlePortfolioStream(w http.ResponseWriter, r *http.Request) {
 		base = "INR"
 	}
 
+	// we can dynamically update the stream interval
 	interval := s.StreamInterval
 	if interval < minStreamInterval {
 		interval = fallbackStreamInterval
@@ -98,8 +117,8 @@ func (s *Server) handlePortfolioStream(w http.ResponseWriter, r *http.Request) {
 	// introducing a gzip compression on data sent on the SSE stream(tested --> resulted in 3.1x compression, when scaling this results in about 3x lower bills)
 	// ideally ,we should do it on some CDN layer, but this is a kind of fallback
 	var (
-		out io.Writer = w
-		gz  *gzip.Writer
+		out io.Writer    = w
+		gz  *gzip.Writer // per connection gzip writer as they aren't reliable to be shared
 	)
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 		w.Header().Set("Content-Encoding", "gzip")
@@ -142,19 +161,20 @@ func (s *Server) handlePortfolioStream(w http.ResponseWriter, r *http.Request) {
 		return true
 	}
 
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	// i noticed a loading at the start, this is because the first SSE stream might have not come up
+	// this helps in iniating data as soon as the app is up, not causing lag for first user
 	if !send() {
 		return
 	}
 
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
 	for {
 		select {
-
 		// client disconnect case
 		case <-r.Context().Done():
 			return
-
 		// normal case
 		case <-ticker.C:
 			if !send() {
@@ -162,41 +182,4 @@ func (s *Server) handlePortfolioStream(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-}
-
-func (s *Server) handleCurrencies(w http.ResponseWriter, r *http.Request) {
-	cs, err := s.Portfolio.SupportedCurrencies(r.Context())
-	if err != nil {
-		writeJSON(w, http.StatusBadGateway, map[string]string{"error": err.Error()})
-		return
-	}
-	writeJSON(w, http.StatusOK, map[string]any{"currencies": cs})
-}
-
-func (s *Server) handleExchanges(w http.ResponseWriter, r *http.Request) {
-	es, err := s.Portfolio.Exchanges(r.Context())
-	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
-		return
-	}
-	writeJSON(w, http.StatusOK, es)
-}
-
-func writeJSON(w http.ResponseWriter, status int, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(v)
-}
-
-func withCORS(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		h.ServeHTTP(w, r)
-	})
 }

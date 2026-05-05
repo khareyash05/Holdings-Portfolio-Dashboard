@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"hash/fnv"
 	"log"
+	"math/rand/v2"
 	"os"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
-	"github.com/khareyash05/Holdings-Portfolio-Dashboard/internal/clients"
 	"github.com/khareyash05/Holdings-Portfolio-Dashboard/internal/models"
 )
 
@@ -19,8 +19,6 @@ type Seeder struct {
 	DB            *gorm.DB
 	StocksPath    string
 	ExchangesPath string
-	Exchange      *clients.ExchangeClient
-	Salt          string
 }
 
 type stockFile struct {
@@ -116,31 +114,9 @@ func (s *Seeder) Run(ctx context.Context) error {
 		}
 	}
 
-	exchangePrices := map[string]map[string]float64{}
-	exchangeSet := map[string]struct{}{}
-	for _, st := range stocks {
-		exchangeSet[st.Exchange] = struct{}{}
-	}
-	for ex := range exchangeSet {
-		snaps, err := s.Exchange.Snapshots(ctx, ex)
-		if err != nil {
-			return fmt.Errorf("fetch snapshots for %s: %w", ex, err)
-		}
-		m := make(map[string]float64, len(snaps))
-		for _, q := range snaps {
-			m[q.Ticker] = q.Price
-		}
-		exchangePrices[ex] = m
-	}
-
 	holdings := make([]models.Holding, 0, len(stocks))
 	for _, st := range stocks {
-		current := exchangePrices[st.Exchange][st.Ticker]
-		if current <= 0 {
-			current = 100
-		}
-		factor := boughtFactor(s.Salt, st.Ticker)
-		bought := round2(current * factor)
+		bought := round2(boughtPriceFor(st.Currency))
 		holdings = append(holdings, models.Holding{
 			Ticker:           st.Ticker,
 			Quantity:         st.Volume,
@@ -154,17 +130,19 @@ func (s *Seeder) Run(ctx context.Context) error {
 	return nil
 }
 
-// a simple way to show variance across prices, using salt and ticker here
-// we hash (salt| ticker) and divide it by 10000 such because our holdings lies in 10000's
-// this results in varied continuous factor from the bought price
-// the salt is used such that across different deployment, the values remain same
-// also this ensures that while testing ,tests always pass
-func boughtFactor(salt, ticker string) float64 {
-	h := fnv.New64a() // can use crypto/sha256(involves cryptography which is an overkill here) here as well, but this library is lightweight in nature and not do overengineering.
-	h.Write([]byte(salt + "|" + ticker))
-	return 0.7 + float64(h.Sum64()%550)/1000 // 550 is a random number , ensures about 45% false rates, easier to show both sides, not used 500, might show fight alternate intervals
-}
-
 func round2(v float64) float64 {
 	return float64(int64(v*100+0.5)) / 100
+}
+
+func boughtPriceFor(currency string) float64 {
+	switch strings.ToUpper(currency) {
+	case "INR":
+		return 500 + rand.Float64()*4500
+	case "JPY":
+		return 1000 + rand.Float64()*9000
+	case "HKD":
+		return 50 + rand.Float64()*750
+	default:
+		return 50 + rand.Float64()*450
+	}
 }
