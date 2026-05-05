@@ -7,46 +7,46 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        border: "hsl(0 0% 16%)",
+        input: "hsl(0 0% 12%)",
+        ring: "hsl(0 0% 60%)",
+        background: "hsl(0 0% 5.5%)",
+        foreground: "hsl(0 0% 90%)",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "hsl(0 0% 90%)",
+          foreground: "hsl(0 0% 9%)",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "hsl(0 0% 9%)",
+          foreground: "hsl(0 0% 90%)",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "hsl(0 60% 60%)",
+          foreground: "hsl(0 0% 98%)",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "hsl(0 0% 9%)",
+          foreground: "hsl(0 0% 53%)",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "hsl(0 0% 9%)",
+          foreground: "hsl(0 0% 90%)",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "hsl(0 0% 5.5%)",
+          foreground: "hsl(0 0% 90%)",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "hsl(0 0% 5.5%)",
+          foreground: "hsl(0 0% 90%)",
         },
-        pos: "hsl(var(--pos))",
-        neg: "hsl(var(--neg))",
+        pos: "hsl(138 35% 55%)",
+        neg: "hsl(0 65% 67%)",
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "0.25rem",
+        md: "calc(0.25rem - 2px)",
+        sm: "calc(0.25rem - 4px)",
       },
       fontFamily: {
         sans: [

@@ -1,10 +1,4 @@
-// invariant: when an upstream service is paused, last-good cache must keep responses 200
-// proof: run a steady 20 RPS for 60s. midway, you pause forex-service from another shell:
-//   docker pause paasa-forex-service   (run at t=20s)
-//   docker unpause paasa-forex-service (run at t=40s)
-// during the outage window, forex calls fail, but the lastgood-forex cache (24h ttl) supplies stale rates
-// threshold: zero 5xx for the entire run, including the outage window
-// if last-good fallback regresses, this immediately fails with a flood of 500s
+// a test to check if the last good cache works if the service is down
 
 import http from 'k6/http';
 import { check } from 'k6';

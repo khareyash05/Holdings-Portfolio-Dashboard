@@ -8,19 +8,19 @@ interface Props {
 }
 
 const COLORS = [
-  "#5eb87a",
-  "#7ab8c4",
-  "#c4a85e",
-  "#b87a7a",
-  "#9a8fb8",
-  "#5a8a9a",
-  "#b8a85e",
-  "#8a8a8a",
-  "#7ab85e",
-  "#b87aa8",
+  "red",
+  "blue",
+  "green",
+  "orange",
+  "purple",
+  "yellow",
+  "teal",
+  "pink",
+  "brown",
+  "cyan",
 ];
 
-export function AllocationChart({ buckets, baseCurrency }: Props) {
+export function Chart({ buckets, baseCurrency }: Props) {
   const total = buckets.reduce((s, b) => s + b.current, 0);
   const data = buckets.map((b) => ({
     name: b.key,
@@ -39,7 +39,7 @@ export function AllocationChart({ buckets, baseCurrency }: Props) {
             innerRadius={60}
             outerRadius={100}
             paddingAngle={1}
-            stroke="hsl(var(--background))"
+            stroke="white"
             strokeWidth={2}
           >
             {data.map((_, i) => (
@@ -48,12 +48,12 @@ export function AllocationChart({ buckets, baseCurrency }: Props) {
           </Pie>
           <Tooltip
             contentStyle={{
-              background: "hsl(var(--background))",
-              border: "1px solid hsl(var(--border))",
+              background: "white",
+              border: "1px solid lightgray",
               borderRadius: 0,
               fontSize: 12,
             }}
-            formatter={(value: number, _name, item) => [
+            formatter={(value: number, name, item) => [
               `${formatMoney(value, baseCurrency)} (${formatPct(item.payload.pct)})`,
               item.payload.name,
             ]}

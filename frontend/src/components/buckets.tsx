@@ -9,7 +9,7 @@ import {
 import { formatMoney, formatPct } from "@/lib/format";
 import type { Holding, GroupBy } from "@/types";
 import { bucketsFor } from "@/lib/buckets";
-import { AllocationChart } from "./chart";
+import { Chart } from "./chart";
 
 interface Props {
   holdings: Holding[];
@@ -93,7 +93,7 @@ export function Buckets({ holdings, baseCurrency }: Props) {
           })}
         </div>
 
-        <AllocationChart buckets={sorted} baseCurrency={baseCurrency} />
+        <Chart buckets={sorted} baseCurrency={baseCurrency} />
       </div>
     </section>
   );

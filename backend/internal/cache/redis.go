@@ -70,7 +70,6 @@ func (c *Redis[T]) read(ctx context.Context, full string) (T, bool, error) {
 	}
 	var v T
 	if jerr := json.Unmarshal(raw, &v); jerr != nil {
-		log.Printf("redis %s: bad payload %v", full, jerr)
 		return zero, false, nil
 	}
 	return v, true, nil

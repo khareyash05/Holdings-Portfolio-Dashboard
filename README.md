@@ -43,7 +43,7 @@ docker compose down -v
 - **Two-tier Redis cache** — hot keys (`price:<exch>` TTL 3s, `forex:<base>` TTL 60s) for steady-state, plus a 24h "last-good" key per upstream so the dashboard keeps serving when forex/exchange are down.
 - **Per-IP rate limiting** — token bucket algorimthm(`golang.org/x/time/rate`) with configurable rates per second fillup + bucket capacity, returns `429` + `Retry-After`.
 - **Gzip-compressed SSE stream** — content-encoding per request;  about 3× reduction on the snapshot payload.
-- **Circuit breaker on upstream calls** — if connections with other services(here- forex and exchange) has issues where more than 50% are failures(total requests should be min 3), then the connection will break, reducing the hanging connection
+- **Circuit breaker on upstream calls** — if connections with other services(here- forex and exchange) has issues where more than 50% are failures(total requests should be min 3), then the connection will break, removing the hanging connection
 ---
 
 ## UI Summary
@@ -52,7 +52,7 @@ docker compose down -v
 * Top summary: total net-worth, total invested, total unrealized gains — all in the selected base currency.
 * Buckets section: grouping selector (Exchange / Region-Country / Sector-Industry / Currency) plus ascending/descending sort. Default grouping is **Exchange**
 * All Holdings table: 100 rows, sortable by Net-worth, Current Price, Quantity, Unrealized Gains, or Invested amount, ascending or descending
-* The page subscribes to `/api/portfolio/stream` over Server-Sent Events; the backend pushes a fresh snapshot every 3 s so prices visibly drift without the client polling
+* The page subscribes to `/api/portfolio/stream` over Server-Sent Events; the backend pushes a fresh snapshot every 3s so prices visibly drift without the client polling
 
 ---
 

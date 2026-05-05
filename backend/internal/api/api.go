@@ -1,11 +1,7 @@
 package api
 
 import (
-	"compress/gzip"
 	"context"
-	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -29,18 +25,18 @@ func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", s.handleHealth)
 	mux.HandleFunc("/api/health", s.handleHealth)
-
-	rateLimiterMiddleware := func(h http.HandlerFunc) http.Handler {
-		if s.RateLimiter == nil {
-			return h
-		}
-		return s.RateLimiter.Middleware(h)
-	}
-	mux.Handle("/api/portfolio", rateLimiterMiddleware(s.handlePortfolio))
-	mux.Handle("/api/portfolio/stream", rateLimiterMiddleware(s.handlePortfolioStream))
-	mux.Handle("/api/currencies", rateLimiterMiddleware(s.handleCurrencies))
-	mux.Handle("/api/exchanges", rateLimiterMiddleware(s.handleExchanges))
+	mux.Handle("/api/portfolio", s.withRateLimiter(s.handlePortfolio))
+	mux.Handle("/api/portfolio/stream", s.withRateLimiter(s.handlePortfolioStream))
+	mux.Handle("/api/currencies", s.withRateLimiter(s.handleCurrencies))
+	mux.Handle("/api/exchanges", s.withRateLimiter(s.handleExchanges))
 	return withCORS(mux)
+}
+
+func (s *Server) withRateLimiter(h http.HandlerFunc) http.Handler {
+	if s.RateLimiter == nil {
+		return h
+	}
+	return s.RateLimiter.Middleware(h)
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, _ *http.Request) {
@@ -88,94 +84,36 @@ func (s *Server) handleExchanges(w http.ResponseWriter, r *http.Request) {
 // 2. Flush after every event
 // 3. Stop work when the client leaves
 func (s *Server) handlePortfolioStream(w http.ResponseWriter, r *http.Request) {
-	flusher, ok := w.(http.Flusher)
+	// Ensure the response writer supports streaming (SSE requires flushing)
+	flusher, ok := s.ensureFlusher(w)
 	if !ok {
-		http.Error(w, "streaming unsupported", http.StatusInternalServerError)
 		return
 	}
 
-	base := strings.ToUpper(r.URL.Query().Get("base"))
-	if base == "" {
-		base = "INR"
-	}
+	// Extract query params (base currency + stream interval)
+	base := getBase(r)
+	interval := s.getStreamInterval(r)
 
-	// we can dynamically update the stream interval
-	interval := s.StreamInterval
-	if interval < minStreamInterval {
-		interval = fallbackStreamInterval
-	}
-	if v := r.URL.Query().Get("interval"); v != "" {
-		if d, err := time.ParseDuration(v); err == nil && d >= minStreamInterval {
-			interval = d
-		}
-	}
+	// Setup SSE headers + gzip compression
+	// `out` is where we write
+	out, gz := setupStreamWriter(w, r)
+	defer closeGzip(gz)
 
-	w.Header().Set("Content-Type", "text/event-stream") //SSE
-	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Cache-Control", "no-cache")
-
-	// introducing a gzip compression on data sent on the SSE stream(tested --> resulted in 3.1x compression, when scaling this results in about 3x lower bills)
-	// ideally ,we should do it on some CDN layer, but this is a kind of fallback
-	var (
-		out io.Writer    = w
-		gz  *gzip.Writer // per connection gzip writer as they aren't reliable to be shared
-	)
-	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-		w.Header().Set("Content-Encoding", "gzip")
-		w.Header().Set("Vary", "Accept-Encoding")
-		gz, _ = gzip.NewWriterLevel(w, gzip.BestSpeed)
-		defer gz.Close()
-		out = gz
-	}
-	w.WriteHeader(http.StatusOK)
-
-	// sending portfolio after marshalling
-	send := func() bool {
-		resp, err := s.Portfolio.Portfolio(r.Context(), base)
-		if err != nil {
-			payload, _ := json.Marshal(map[string]string{"error": err.Error()})
-			if _, werr := fmt.Fprintf(out, "event: app-error\ndata: %s\n\n", payload); werr != nil {
-				return false
-			}
-			if gz != nil {
-				if ferr := gz.Flush(); ferr != nil {
-					return false
-				}
-			}
-			flusher.Flush()
-			return true
-		}
-		payload, err := json.Marshal(resp)
-		if err != nil {
-			return false
-		}
-		if _, werr := fmt.Fprintf(out, "data: %s\n\n", payload); werr != nil {
-			return false
-		}
-		if gz != nil {
-			if ferr := gz.Flush(); ferr != nil {
-				return false
-			}
-		}
-		flusher.Flush()
-		return true
-	}
+	// setup portfolio function, will fetch and write data
+	send := s.makePortfolioSender(r, base, out, flusher, gz)
 
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	// i noticed a loading at the start, this is because the first SSE stream might have not come up
-	// this helps in iniating data as soon as the app is up, not causing lag for first user
+	// Send first response immediately (avoids initial client-side loading delay)
 	if !send() {
 		return
 	}
 
 	for {
 		select {
-		// client disconnect case
 		case <-r.Context().Done():
 			return
-		// normal case
 		case <-ticker.C:
 			if !send() {
 				return

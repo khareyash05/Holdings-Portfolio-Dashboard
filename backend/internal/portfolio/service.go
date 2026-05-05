@@ -256,6 +256,7 @@ func (s *Service) Portfolio(ctx context.Context, baseCurrency string) (*models.P
 	views := make([]models.HoldingView, 0, len(holdings))
 	var totalNet, totalInvested float64
 	anyStale := ratesStale
+	
 	for _, h := range holdings {
 		prices, hasPrices := priceMap[h.Exchange]
 		curLocal, hasTicker := 0.0, false
@@ -263,14 +264,18 @@ func (s *Service) Portfolio(ctx context.Context, baseCurrency string) (*models.P
 			curLocal, hasTicker = prices[h.Ticker], true
 		}
 		stale := staleEx[h.Exchange] || ratesStale
+
+		// if it doesnt have price or ticker, falllback to the current price
 		if !hasTicker {
 			curLocal = h.BoughtPrice
 			stale = true
 		}
-		localToBase, err := convertFactor(rates.Rates, h.Currency, baseCurrency)
+		
+		localToBase, err := convertFactor(rates.Rates, h.Currency, baseCurrency) // comvert the current into the currency of the exchange
 		if err != nil {
 			return nil, err
 		}
+		
 		invested := h.Quantity * h.BoughtPrice * localToBase
 		networth := h.Quantity * curLocal * localToBase
 		gains := networth - invested
@@ -278,6 +283,7 @@ func (s *Service) Portfolio(ctx context.Context, baseCurrency string) (*models.P
 		if invested > 0 {
 			gainsPct = gains / invested * 100
 		}
+		// return per holding(for each and every holding, used in below section of ui where we show all holdings)
 		views = append(views, models.HoldingView{
 			Ticker:            h.Ticker,
 			Name:              h.Name,
@@ -312,6 +318,7 @@ func (s *Service) Portfolio(ctx context.Context, baseCurrency string) (*models.P
 	if totalInvested > 0 {
 		pct = gains / totalInvested * 100
 	}
+	// return portfolio summary ,the overall summary
 	return &models.PortfolioResponse{
 		BaseCurrency: baseCurrency,
 		AsOf:         time.Now().UTC(),

@@ -188,7 +188,6 @@ func main() {
 			http.NotFound(w, r)
 		}
 	})
-	log.Printf("exchange-service listening on %s (%d stocks, %d exchanges)", addr, len(stocks), len(exchanges))
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(err)
 	}

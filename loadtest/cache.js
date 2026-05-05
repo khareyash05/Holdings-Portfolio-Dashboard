@@ -1,10 +1,4 @@
-// invariant: redis price cache (3s ttl) must serve hot reads materially faster than cold
-// proof: fire 50 sequential requests at the same base with no sleep
-//   the first miss warms the cache; the next ~50 within the 3s ttl window must hit redis
-// expectation: cold p50 ~30-80ms (db + upstream + serialize), hot p50 ~5-15ms (redis + serialize)
-// threshold: p50 < 25ms across the whole run — if caching regresses, p50 will look like cold p50
-// also: median of last 40 requests should be well under 20ms (steady-state hot path)
-
+// cache test for forex and exchange data
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Trend } from 'k6/metrics';
