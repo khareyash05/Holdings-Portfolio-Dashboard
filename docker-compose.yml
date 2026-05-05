@@ -1,0 +1,95 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: paasa
+      POSTGRES_PASSWORD: paasa
+      POSTGRES_DB: paasa
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paasa -d paasa"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  forex-service:
+    build:
+      context: .
+      dockerfile: forex-service/Dockerfile
+    environment:
+      LISTEN_ADDR: ":8081"
+      FOREX_DATA: "/app/data/forex.json"
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  exchange-service:
+    build:
+      context: .
+      dockerfile: exchange-service/Dockerfile
+    environment:
+      LISTEN_ADDR: ":8082"
+      STOCKS_DATA: "/app/data/stocks.json"
+      EXCHANGES_DATA: "/app/data/exchanges.json"
+    ports:
+      - "8082:8082"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8082/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      LISTEN_ADDR: ":8080"
+      DATABASE_URL: "postgres://paasa:paasa@db:5432/paasa?sslmode=disable"
+      FOREX_BASE_URL: "http://forex-service:8081"
+      EXCHANGE_BASE_URL: "http://exchange-service:8082"
+      REDIS_URL: "redis://redis:6379"
+      STOCKS_DATA: "/app/data/stocks.json"
+      EXCHANGES_DATA: "/app/data/exchanges.json"
+      PRICE_CACHE_TTL: "3s"
+      FOREX_CACHE_TTL: "60s"
+    depends_on:
+      db:
+        condition: service_healthy
+      forex-service:
+        condition: service_healthy
+      exchange-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
+volumes:
+  pgdata:

@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/.git
+**/*.log
+**/.DS_Store
+.env
+.env.*
+**/.idea
+**/.vscode
+backend/server
+exchange-service/exchange-service
+forex-service/forex-service

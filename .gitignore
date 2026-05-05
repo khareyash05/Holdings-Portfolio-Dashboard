@@ -1,0 +1,14 @@
+node_modules
+dist
+*.tsbuildinfo
+/tmp
+/bin
+.DS_Store
+*.log
+.idea
+.vscode
+.env
+.env.local
+backend/server
+exchange-service/exchange-service
+forex-service/forex-service
