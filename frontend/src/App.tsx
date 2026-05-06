@@ -20,13 +20,13 @@ export function App() {
       />
 
       {error && (
-        <div className="mb-4 border border-neg px-3 py-2 text-sm text-neg">
+        <div className="mb-4 border border-red-400 px-3 py-2 text-sm text-red-400">
           {error}
         </div>
       )}
 
       {loading || !data ? (
-        <p className="py-8 text-muted-foreground">Loading...</p>
+        <p className="py-8 text-neutral-400">Loading...</p>
       ) : (
         <>
           <SummaryCards

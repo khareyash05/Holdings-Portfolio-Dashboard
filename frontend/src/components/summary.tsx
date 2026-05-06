@@ -9,13 +9,13 @@ interface Props {
 
 const cardCls = "rounded-none border-0 bg-transparent shadow-none";
 const labelCls =
-  "text-xs font-normal uppercase tracking-wider text-muted-foreground";
+  "text-xs font-normal uppercase tracking-wider text-neutral-400";
 
 export function SummaryCards({ summary, baseCurrency }: Props) {
-  const cls = summary.unrealizedGains >= 0 ? "text-pos" : "text-neg";
+  const cls = summary.unrealizedGains >= 0 ? "text-green-500" : "text-red-400";
   return (
-    <div className="mb-8 grid grid-cols-1 border border-border md:grid-cols-3">
-      <Card className={`${cardCls} border-r border-border md:border-r`}>
+    <div className="mb-8 grid grid-cols-1 border border-zinc-800 md:grid-cols-3">
+      <Card className={`${cardCls} border-r border-zinc-800 md:border-r`}>
         <CardHeader className="pb-2">
           <CardTitle className={labelCls}>Current</CardTitle>
         </CardHeader>
@@ -25,7 +25,7 @@ export function SummaryCards({ summary, baseCurrency }: Props) {
           </p>
         </CardContent>
       </Card>
-      <Card className={`${cardCls} border-r border-border md:border-r`}>
+      <Card className={`${cardCls} border-r border-zinc-800 md:border-r`}>
         <CardHeader className="pb-2">
           <CardTitle className={labelCls}>Invested</CardTitle>
         </CardHeader>

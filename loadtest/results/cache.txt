@@ -1,0 +1,81 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: loadtest/cache.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 1 max VUs, 1m0s max duration (incl. graceful stop):
+              * sequential: 50 iterations for each of 1 VUs (maxDuration: 30s, gracefulStop: 30s)
+
+
+running (0m01.0s), 1/1 VUs, 6 complete and 0 interrupted iterations
+sequential   [  12% ] 1 VUs  01.0s/30s  06/50 iters, 50 per VU
+
+running (0m02.0s), 1/1 VUs, 12 complete and 0 interrupted iterations
+sequential   [  24% ] 1 VUs  02.0s/30s  12/50 iters, 50 per VU
+
+running (0m03.0s), 1/1 VUs, 19 complete and 0 interrupted iterations
+sequential   [  38% ] 1 VUs  03.0s/30s  19/50 iters, 50 per VU
+
+running (0m04.0s), 1/1 VUs, 25 complete and 0 interrupted iterations
+sequential   [  50% ] 1 VUs  04.0s/30s  25/50 iters, 50 per VU
+
+running (0m05.0s), 1/1 VUs, 32 complete and 0 interrupted iterations
+sequential   [  64% ] 1 VUs  05.0s/30s  32/50 iters, 50 per VU
+
+running (0m06.0s), 1/1 VUs, 38 complete and 0 interrupted iterations
+sequential   [  76% ] 1 VUs  06.0s/30s  38/50 iters, 50 per VU
+
+running (0m07.0s), 1/1 VUs, 45 complete and 0 interrupted iterations
+sequential   [  90% ] 1 VUs  07.0s/30s  45/50 iters, 50 per VU
+
+
+  █ THRESHOLDS 
+
+    cache_hot_ms
+    ✓ 'p(50)<20' p(50)=3.56ms
+    ✓ 'p(95)<60' p(95)=5.2ms
+
+    http_req_duration
+    ✓ 'p(50)<25' p(50)=3.64ms
+    ✓ 'p(95)<100' p(95)=5.39ms
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 50      6.45369/s
+    checks_succeeded...: 100.00% 50 out of 50
+    checks_failed......: 0.00%   0 out of 50
+
+    ✓ status is 200
+
+    CUSTOM
+    cache_hot_ms...................: avg=3.68ms  min=1.58ms   med=3.56ms   max=6.96ms   p(90)=5.02ms  p(95)=5.2ms   
+
+    HTTP
+    http_req_duration..............: avg=3.77ms  min=1.58ms   med=3.64ms   max=6.96ms   p(90)=5.02ms  p(95)=5.39ms  
+      { expected_response:true }...: avg=3.77ms  min=1.58ms   med=3.64ms   max=6.96ms   p(90)=5.02ms  p(95)=5.39ms  
+    http_req_failed................: 0.00%  0 out of 50
+    http_reqs......................: 50     6.45369/s
+
+    EXECUTION
+    iteration_duration.............: avg=154.9ms min=151.95ms med=154.85ms max=157.97ms p(90)=156.1ms p(95)=156.68ms
+    iterations.....................: 50     6.45369/s
+    vus............................: 1      min=1       max=1
+    vus_max........................: 1      min=1       max=1
+
+    NETWORK
+    data_received..................: 1.7 MB 224 kB/s
+    data_sent......................: 4.6 kB 594 B/s
+
+
+
+
+running (0m07.7s), 0/1 VUs, 50 complete and 0 interrupted iterations
+sequential ✓ [ 100% ] 1 VUs  07.7s/30s  50/50 iters, 50 per VU

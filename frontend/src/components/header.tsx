@@ -31,17 +31,17 @@ export function Header({ baseCurrency, onChange, currencies, asOf }: Props) {
     ...currencies.filter((c) => !PREFERRED.includes(c)),
   ];
   return (
-    <header className="mb-6 flex items-baseline justify-between border-b border-border pb-4">
+    <header className="mb-6 flex items-baseline justify-between border-b border-zinc-800 pb-4">
       <div className="flex items-baseline gap-3">
         <h1 className="text-lg font-semibold">Paasa Portfolio</h1>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-neutral-400">
           {asOf
             ? `Updated ${new Date(asOf).toLocaleTimeString()}`
             : "Loading..."}
         </p>
       </div>
       <div className="flex items-baseline gap-2 text-sm">
-        <label className="text-muted-foreground">Base</label>
+        <label className="text-neutral-400">Base</label>
         <Select value={baseCurrency} onValueChange={onChange}>
           <SelectTrigger className="h-8 w-[100px] rounded-none">
             <SelectValue />

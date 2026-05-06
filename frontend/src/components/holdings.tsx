@@ -54,11 +54,11 @@ export function Holdings({ holdings, baseCurrency }: Props) {
         <h2 className="text-sm font-semibold uppercase tracking-wider">
           Holdings
         </h2>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-neutral-400">
           {holdings.length} rows
         </span>
       </div>
-      <div className="overflow-x-auto border border-border">
+      <div className="overflow-x-auto border border-zinc-800">
         <Table>
           <TableHeader>
             <TableRow>
@@ -67,9 +67,9 @@ export function Holdings({ holdings, baseCurrency }: Props) {
                   key={c.key}
                   onClick={() => onClick(c.key)}
                   className={[
-                    "cursor-pointer select-none hover:text-foreground",
+                    "cursor-pointer select-none hover:text-zinc-200",
                     c.numeric ? "text-right" : "",
-                    sortKey === c.key ? "text-foreground" : "",
+                    sortKey === c.key ? "text-zinc-200" : "",
                   ].join(" ")}
                 >
                   {c.label}
@@ -80,7 +80,7 @@ export function Holdings({ holdings, baseCurrency }: Props) {
           </TableHeader>
           <TableBody>
             {sorted.map((h) => {
-              const cls = h.unrealizedGains >= 0 ? 'text-pos' : 'text-neg';
+              const cls = h.unrealizedGains >= 0 ? 'text-green-500' : 'text-red-400';
               return (
                 <TableRow key={h.ticker}>
                   <TableCell className="font-mono">{h.ticker}</TableCell>

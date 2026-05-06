@@ -74,7 +74,7 @@ amount_in_B = amount_in_A × rates[B](in INR) / rates[A](in INR)
 - The `Exchanges()` list is loaded from Postgres once.
 
 ### Realtime
-Server-Sent Events. The client opens a single `EventSource` on `/api/portfolio/stream?base=X`; the backend pushes a fresh snapshot every 3s (matching the price cache TTL).
+Server-Sent Events. The client opens a single `EventSource` on `/api/portfolio/stream?base=X`; the backend pushes a fresh snapshot every 3s.
 
 ---
 

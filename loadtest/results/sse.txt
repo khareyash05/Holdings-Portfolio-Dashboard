@@ -1,0 +1,135 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: loadtest/sse.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 100 max VUs, 1m0s max duration (incl. graceful stop):
+              * sse: 1 iterations for each of 100 VUs (maxDuration: 30s, gracefulStop: 30s)
+
+
+running (0m01.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  01.0s/30s  080/100 iters, 1 per VU
+
+running (0m02.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  02.0s/30s  080/100 iters, 1 per VU
+
+running (0m03.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  03.0s/30s  080/100 iters, 1 per VU
+
+running (0m04.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  04.0s/30s  080/100 iters, 1 per VU
+
+running (0m05.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  05.0s/30s  080/100 iters, 1 per VU
+
+running (0m06.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  06.0s/30s  080/100 iters, 1 per VU
+
+running (0m07.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  07.0s/30s  080/100 iters, 1 per VU
+
+running (0m08.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  08.0s/30s  080/100 iters, 1 per VU
+
+running (0m09.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  09.0s/30s  080/100 iters, 1 per VU
+
+running (0m10.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  10.0s/30s  080/100 iters, 1 per VU
+
+running (0m11.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  11.0s/30s  080/100 iters, 1 per VU
+
+running (0m12.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  12.0s/30s  080/100 iters, 1 per VU
+
+running (0m13.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  13.0s/30s  080/100 iters, 1 per VU
+
+running (0m14.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  14.0s/30s  080/100 iters, 1 per VU
+
+running (0m15.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  15.0s/30s  080/100 iters, 1 per VU
+
+running (0m16.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  16.0s/30s  080/100 iters, 1 per VU
+
+running (0m17.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  17.0s/30s  080/100 iters, 1 per VU
+
+running (0m18.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  18.0s/30s  080/100 iters, 1 per VU
+
+running (0m19.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  19.0s/30s  080/100 iters, 1 per VU
+
+running (0m20.0s), 020/100 VUs, 80 complete and 0 interrupted iterations
+sse    [  80% ] 100 VUs  20.0s/30s  080/100 iters, 1 per VU
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+time="2026-05-05T23:03:10+05:30" level=warning msg="Request Failed" error="request timeout"
+
+
+  █ THRESHOLDS 
+
+    sse_failed_connect
+    ✗ 'count<2' count=80
+
+    sse_ttfb_ms
+    ✓ 'p(95)<500' p(95)=75.84ms
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    sse_bytes_per_stream...: avg=678998.45 min=670645  med=671744  max=689651  p(90)=689631.3 p(95)=689634.85
+    sse_failed_connect.....: 80      3.997702/s
+    sse_held_ok............: 20      0.999426/s
+    sse_ttfb_ms............: avg=48.48ms   min=30.3ms  med=50.83ms max=76.49ms p(90)=74.64ms  p(95)=75.84ms  
+
+    HTTP
+    http_req_duration......: avg=4.03s     min=30.32ms med=50.86ms max=20s     p(90)=20s      p(95)=20s      
+    http_req_failed........: 100.00% 100 out of 100
+    http_reqs..............: 100     4.997128/s
+
+    EXECUTION
+    iteration_duration.....: avg=4.03s     min=31.46ms med=53.96ms max=20.01s  p(90)=20s      p(95)=20s      
+    iterations.............: 100     4.997128/s
+    vus....................: 20      min=20         max=20 
+    vus_max................: 100     min=100        max=100
+
+    NETWORK
+    data_received..........: 14 MB   681 kB/s
+    data_sent..............: 14 kB   690 B/s
+
+
+
+
+running (0m20.0s), 000/100 VUs, 100 complete and 0 interrupted iterations
+sse  ✓ [ 100% ] 100 VUs  20.0s/30s  100/100 iters, 1 per VU
+time="2026-05-05T23:03:10+05:30" level=error msg="thresholds on metrics 'sse_failed_connect' have been crossed"

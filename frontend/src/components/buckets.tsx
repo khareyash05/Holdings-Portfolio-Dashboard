@@ -33,7 +33,7 @@ export function Buckets({ holdings, baseCurrency }: Props) {
         </h2>
         <div className="flex gap-4 text-sm">
           <div className="flex items-baseline gap-2">
-            <label className="text-muted-foreground">By</label>
+            <label className="text-neutral-400">By</label>
             <Select
               value={groupBy}
               onValueChange={(v) => setGroupBy(v as GroupBy)}
@@ -49,7 +49,7 @@ export function Buckets({ holdings, baseCurrency }: Props) {
             </Select>
           </div>
           <div className="flex items-baseline gap-2">
-            <label className="text-muted-foreground">Sort</label>
+            <label className="text-neutral-400">Sort</label>
             <Select
               value={sortKey}
               onValueChange={(v) => setSortKey(v as "value" | "gain")}
@@ -67,16 +67,16 @@ export function Buckets({ holdings, baseCurrency }: Props) {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] border border-border self-start">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] border border-zinc-800 self-start">
           {sorted.map((b) => {
-            const cls = b.gainAbs >= 0 ? "text-pos" : "text-neg";
+            const cls = b.gainAbs >= 0 ? "text-green-500" : "text-red-400";
             return (
               <div
                 key={b.key}
-                className="border-b border-r border-border/50 p-3"
+                className="border-b border-r border-zinc-800/50 p-3"
               >
-                <div className="flex items-baseline justify-between text-xs text-muted-foreground">
-                  <span className="font-medium text-foreground">{b.key}</span>
+                <div className="flex items-baseline justify-between text-xs text-neutral-400">
+                  <span className="font-medium text-zinc-200">{b.key}</span>
                   <span>{b.count}</span>
                 </div>
                 <div className="mt-1.5 text-lg tabular-nums">

@@ -29,7 +29,7 @@ export function Chart({ buckets, baseCurrency }: Props) {
   }));
 
   return (
-    <div className="h-[280px] w-full border border-border p-3">
+    <div className="h-[280px] w-full border border-zinc-800 p-3">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
