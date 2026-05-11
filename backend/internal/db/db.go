@@ -4,8 +4,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-
-	"github.com/khareyash05/Holdings-Portfolio-Dashboard/internal/models"
 )
 
 func Connect(url string) (*gorm.DB, error) {
@@ -23,8 +21,4 @@ func Connect(url string) (*gorm.DB, error) {
 		return nil, err
 	}
 	return gdb, nil
-}
-
-func Migrate(db *gorm.DB) error {
-	return db.AutoMigrate(&models.Exchange{}, &models.Stock{}, &models.Holding{})
 }

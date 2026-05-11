@@ -31,7 +31,7 @@ func NewExchangeClient(baseURL string) *ExchangeClient {
 	return &ExchangeClient{
 		BaseURL: strings.TrimRight(baseURL, "/"),
 		HTTP:    &http.Client{Timeout: 5 * time.Second, Transport: t},
-		breaker: newBreaker[[]models.PriceSnapshot]("exchange"),
+		breaker: NewBreaker[[]models.PriceSnapshot]("exchange"),
 	}
 }
 

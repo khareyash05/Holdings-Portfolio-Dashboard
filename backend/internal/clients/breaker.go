@@ -6,7 +6,7 @@ import (
 	"github.com/sony/gobreaker/v2"
 )
 
-func newBreaker[T any](name string) *gobreaker.CircuitBreaker[T] {
+func NewBreaker[T any](name string) *gobreaker.CircuitBreaker[T] {
 	return gobreaker.NewCircuitBreaker[T](gobreaker.Settings{
 		Name:        name,
 		MaxRequests: 1,

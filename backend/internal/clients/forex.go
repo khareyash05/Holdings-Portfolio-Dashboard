@@ -32,7 +32,7 @@ func NewForexClient(baseURL string) *ForexClient {
 	return &ForexClient{
 		BaseURL: strings.TrimRight(baseURL, "/"),
 		HTTP:    &http.Client{Timeout: 5 * time.Second, Transport: t},
-		breaker: newBreaker[*RatesResponse]("forex"),
+		breaker: NewBreaker[*RatesResponse]("forex"),
 	}
 }
 
